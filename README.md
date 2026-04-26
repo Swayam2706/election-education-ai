@@ -229,7 +229,34 @@ npm run build
 
 ## 🚢 Deployment
 
-### Docker Deployment
+### 🎯 Google Cloud Run (Recommended)
+
+**Automated Deployment (5 minutes):**
+
+**Windows:**
+```bash
+deploy-to-cloud-run.bat
+```
+
+**Mac/Linux:**
+```bash
+chmod +x deploy-to-cloud-run.sh
+./deploy-to-cloud-run.sh
+```
+
+The script will guide you through:
+- Setting up Google Cloud project
+- Deploying backend and frontend
+- Configuring environment variables
+- Seeding the database
+
+**Your app will be live with a Google Cloud Run URL!**
+
+📖 **[Complete Google Cloud Run Guide](./GOOGLE_CLOUD_DEPLOYMENT.md)**
+
+---
+
+### 🐳 Docker Deployment
 
 1. **Build images**
 ```bash
@@ -249,25 +276,15 @@ docker run -p 5001:5001 --env-file backend/.env electedu-backend
 docker run -p 3000:80 electedu-frontend
 ```
 
-### Google Cloud Run Deployment
+---
 
-1. **Deploy backend**
-```bash
-gcloud run deploy electedu-backend \
-  --source ./backend \
-  --region asia-south1 \
-  --allow-unauthenticated
-```
+### 📚 Other Deployment Options
 
-2. **Deploy frontend**
-```bash
-gcloud run deploy electedu-frontend \
-  --source ./frontend \
-  --region asia-south1 \
-  --allow-unauthenticated
-```
+- **Vercel + Render** - Easiest free tier (5-10 min)
+- **Railway** - Fastest deployment (3 min)
+- **Heroku** - One-click deploy (2 min)
 
-[View Full Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)
+[View All Deployment Options](./GOOGLE_CLOUD_DEPLOYMENT.md)
 
 ---
 
