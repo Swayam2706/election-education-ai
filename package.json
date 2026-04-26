@@ -1,0 +1,30 @@
+{
+  "name": "election-education-assistant",
+  "version": "1.0.0",
+  "description": "MERN Stack Election Education Assistant",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "install-server": "cd backend && npm install",
+    "install-client": "cd frontend && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "start": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "mern",
+    "election",
+    "education",
+    "democracy"
+  ],
+  "author": "Election Education Team",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^12.12.1"
+  }
+}
