@@ -33,11 +33,23 @@ interface SubmitQuizRequest {
   timeSpent?: number;
 }
 
+/**
+ * Quiz Service
+ * Handles all quiz-related API operations including fetching quizzes,
+ * submitting answers, and retrieving quiz attempts
+ * @extends BaseApiService
+ */
 class QuizService extends BaseApiService {
   private readonly endpoint = '/quiz';
 
   /**
    * Get all quizzes with optional filters
+   * @param params - Optional filter parameters
+   * @param params.category - Filter by quiz category
+   * @param params.difficulty - Filter by difficulty level
+   * @param params.page - Page number for pagination
+   * @param params.limit - Number of items per page
+   * @returns Promise resolving to quiz list with pagination
    */
   async getQuizzes(params?: {
     category?: string;

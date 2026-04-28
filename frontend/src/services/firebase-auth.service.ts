@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { optimizedAPI } from './optimized-api';
+import { logger } from '../utils/logger';
 
 export interface AuthUser {
   id: string;
@@ -20,15 +21,19 @@ export interface AuthUser {
 }
 
 class FirebaseAuthService {
-  // Google Sign In
+  /**
+   * Sign in with Google OAuth provider
+   * @returns Promise with authenticated user and token
+   * @throws Error if sign-in fails
+   */
   async signInWithGoogle(): Promise<{ user: AuthUser; token: string }> {
     try {
-      console.log('🔄 Starting Google sign-in...');
+      logger.info('Starting Google sign-in...');
       
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      console.log('✅ Google sign-in successful:', user.email);
+      logger.info('Google sign-in successful', { email: user.email });
       
       // Get Firebase token
       const token = await user.getIdToken();
@@ -44,20 +49,26 @@ class FirebaseAuthService {
         token: backendUser.token
       };
     } catch (error) {
-      console.error('❌ Google sign-in error:', error);
+      logger.error('Google sign-in error', error);
       throw this.handleAuthError(error as AuthError);
     }
   }
 
-  // Email/Password Sign In
+  /**
+   * Sign in with email and password
+   * @param email - User email address
+   * @param password - User password
+   * @returns Promise with authenticated user and token
+   * @throws Error if sign-in fails
+   */
   async signInWithEmail(email: string, password: string): Promise<{ user: AuthUser; token: string }> {
     try {
-      console.log('🔄 Starting email sign-in for:', email);
+      logger.info('Starting email sign-in', { email });
       
       const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user;
       
-      console.log('✅ Email sign-in successful:', user.email);
+      logger.info('Email sign-in successful', { email: user.email });
       
       const token = await user.getIdToken();
       const backendUser = await this.syncWithBackend(user, token);
@@ -69,15 +80,22 @@ class FirebaseAuthService {
         token: backendUser.token
       };
     } catch (error) {
-      console.error('❌ Email sign-in error:', error);
+      logger.error('Email sign-in error', error);
       throw this.handleAuthError(error as AuthError);
     }
   }
 
-  // Email/Password Sign Up
+  /**
+   * Sign up with email and password
+   * @param email - User email address
+   * @param password - User password
+   * @param name - User display name
+   * @returns Promise with authenticated user and token
+   * @throws Error if sign-up fails
+   */
   async signUpWithEmail(email: string, password: string, name: string): Promise<{ user: AuthUser; token: string }> {
     try {
-      console.log('🔄 Starting email sign-up for:', email);
+      logger.info('Starting email sign-up', { email });
       
       const result = await createUserWithEmailAndPassword(auth, email, password);
       const user = result.user;
@@ -85,7 +103,7 @@ class FirebaseAuthService {
       // Update profile with name
       await updateProfile(user, { displayName: name });
       
-      console.log('✅ Email sign-up successful:', user.email);
+      logger.info('Email sign-up successful', { email: user.email });
       
       const token = await user.getIdToken();
       const backendUser = await this.syncWithBackend(user, token);
@@ -97,35 +115,48 @@ class FirebaseAuthService {
         token: backendUser.token
       };
     } catch (error) {
-      console.error('❌ Email sign-up error:', error);
+      logger.error('Email sign-up error', error);
       throw this.handleAuthError(error as AuthError);
     }
   }
 
-  // Sign Out
+  /**
+   * Sign out the current user
+   * @throws Error if sign-out fails
+   */
   async signOut(): Promise<void> {
     try {
       await signOut(auth);
       localStorage.removeItem('token');
-      console.log('✅ Sign out successful');
+      logger.info('Sign out successful');
     } catch (error) {
-      console.error('❌ Sign out error:', error);
+      logger.error('Sign out error', error);
       throw this.handleAuthError(error as AuthError);
     }
   }
 
-  // Password Reset
+  /**
+   * Send password reset email
+   * @param email - User email address
+   * @throws Error if password reset fails
+   */
   async resetPassword(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(auth, email);
-      console.log('✅ Password reset email sent to:', email);
+      logger.info('Password reset email sent', { email });
     } catch (error) {
-      console.error('❌ Password reset error:', error);
+      logger.error('Password reset error', error);
       throw this.handleAuthError(error as AuthError);
     }
   }
 
-  // Sync Firebase user with backend
+  /**
+   * Sync Firebase user with backend database
+   * @param firebaseUser - Firebase user object
+   * @param token - Firebase ID token
+   * @returns Promise with user data and backend token
+   * @throws Error if sync fails
+   */
   private async syncWithBackend(firebaseUser: User, token: string): Promise<{ user: AuthUser; token: string }> {
     try {
       const response = await optimizedAPI.post('/auth/firebase-sync', {
@@ -138,14 +169,18 @@ class FirebaseAuthService {
       
       return response;
     } catch (error) {
-      console.error('❌ Backend sync failed:', error);
+      logger.error('Backend sync failed', error);
       throw new Error('Failed to sync user data with server');
     }
   }
 
-  // Handle Firebase auth errors
+  /**
+   * Handle Firebase authentication errors and convert to user-friendly messages
+   * @param error - Firebase auth error
+   * @returns User-friendly error
+   */
   private handleAuthError(error: AuthError): Error {
-    console.error('Firebase Auth Error:', error.code, error.message);
+    logger.error('Firebase Auth Error', { code: error.code, message: error.message });
     
     switch (error.code) {
       case 'auth/user-not-found':

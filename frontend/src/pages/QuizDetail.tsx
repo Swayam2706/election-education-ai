@@ -17,7 +17,13 @@ import {
 import { quizService } from '../services/quiz.service';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { QuizQuestion, QuizResults, QuizTimer, QuizProgress } from '../components/quiz';
 
+/**
+ * QuizDetail Component
+ * Handles quiz taking, submission, and results display
+ * @returns Rendered quiz detail page
+ */
 export default function QuizDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,6 +64,9 @@ export default function QuizDetail() {
     return () => clearInterval(timer);
   }, [quizStarted, quizCompleted, timeLeft]);
 
+  /**
+   * Load quiz data from API
+   */
   const loadQuiz = async () => {
     try {
       setLoading(true);
@@ -79,31 +88,46 @@ export default function QuizDetail() {
     }
   };
 
+  /**
+   * Start the quiz
+   */
   const startQuiz = () => {
     setQuizStarted(true);
     setCurrentQuestion(0);
     setAnswers({});
   };
 
-  const handleAnswerSelect = (questionIndex, answerIndex) => {
+  /**
+   * Handle answer selection
+   */
+  const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     setAnswers(prev => ({
       ...prev,
       [questionIndex]: answerIndex
     }));
   };
 
+  /**
+   * Navigate to next question
+   */
   const nextQuestion = () => {
     if (currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     }
   };
 
+  /**
+   * Navigate to previous question
+   */
   const prevQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(prev => prev - 1);
     }
   };
 
+  /**
+   * Submit quiz and get results
+   */
   const handleSubmitQuiz = async () => {
     if (submitting) return;
     
@@ -137,17 +161,26 @@ export default function QuizDetail() {
     }
   };
 
-  const formatTime = (seconds) => {
+  /**
+   * Format time in MM:SS format
+   */
+  const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getProgressPercentage = () => {
+  /**
+   * Calculate progress percentage
+   */
+  const getProgressPercentage = (): number => {
     return ((currentQuestion + 1) / quiz.questions.length) * 100;
   };
 
-  const getAnsweredCount = () => {
+  /**
+   * Get count of answered questions
+   */
+  const getAnsweredCount = (): number => {
     return Object.keys(answers).length;
   };
 

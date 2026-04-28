@@ -9,6 +9,7 @@ import { queryKeys } from '../lib/react-query';
 import { Loading, CardSkeleton, ListSkeleton } from '../components/Loading';
 import { ComponentErrorBoundary } from '../components/ErrorBoundary';
 import { useUI } from '../store/useAppStore';
+import { StatsCard, RecentActivity, Recommendations } from '../components/dashboard';
 
 // Import animation components and variants
 import {
@@ -58,7 +59,10 @@ interface DashboardStats {
   }>;
 }
 
-// Dashboard API functions
+/**
+ * Dashboard API functions
+ * Handles data fetching for dashboard statistics and user progress
+ */
 const dashboardAPI = {
   getStats: async () => {
     const response = await dashboardService.getStats();
@@ -81,38 +85,11 @@ const dashboardAPI = {
   },
 };
 
-// Stats Card Component with Animation
-const StatsCard = ({ title, value, icon, trend = null, className = '', delay = 0 }: any) => {
-  const prefersReducedMotion = useReducedMotion();
-
-  return (
-    <motion.div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${className}`}
-      variants={prefersReducedMotion ? {} : hoverLift}
-      initial="rest"
-      whileHover="hover"
-      whileTap="tap"
-      custom={delay}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-          {trend && (
-            <p className={`text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
-            </p>
-          )}
-        </div>
-        <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-          {icon}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Main Dashboard Component
+/**
+ * Dashboard Component
+ * Main dashboard view showing user statistics, recent activity, and recommendations
+ * @returns Rendered dashboard page
+ */
 export default function Dashboard() {
   const { user } = useAuth();
   const { addNotification } = useUI();
@@ -280,112 +257,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Activity */}
           <ComponentErrorBoundary componentName="RecentActivity">
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Recent Activity
-                </h2>
-              </div>
-              <div className="p-6">
-                {stats?.recentActivity && stats.recentActivity.length > 0 ? (
-                  <div className="space-y-2">
-                    {stats.recentActivity.map((activity, index) => (
-                      <motion.div 
-                        key={activity.id}
-                        className="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 + (index * 0.1) }}
-                      >
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {activity.title}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(activity.timestamp).toLocaleDateString()}
-                          </p>
-                        </div>
-                        {activity.score && (
-                          <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                            {activity.score}%
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No recent activity. Start learning to see your progress here!
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            <RecentActivity activities={stats?.recentActivity || []} />
           </ComponentErrorBoundary>
 
           {/* Recommendations */}
           <ComponentErrorBoundary componentName="Recommendations">
-            <motion.div 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Recommended for You
-                </h2>
-              </div>
-              <div className="p-6">
-                {stats?.recommendations && stats.recommendations.length > 0 ? (
-                  <div className="space-y-4">
-                    {stats.recommendations.map((recommendation, index) => (
-                      <motion.div 
-                        key={recommendation.id}
-                        className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + (index * 0.1) }}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                            {recommendation.title}
-                          </h4>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            recommendation.type === 'quiz' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                          }`}>
-                            {recommendation.type}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                          {recommendation.description}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                          {recommendation.difficulty && (
-                            <span>Difficulty: {recommendation.difficulty}</span>
-                          )}
-                          <span>{recommendation.estimatedTime} min</span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Complete more activities to get personalized recommendations!
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            <Recommendations recommendations={stats?.recommendations || []} />
           </ComponentErrorBoundary>
         </div>
       </div>

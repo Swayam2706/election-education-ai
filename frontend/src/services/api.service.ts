@@ -3,6 +3,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { useAppStore } from '../store/useAppStore';
+import { logger } from '../utils/logger';
 
 // Types
 interface ApiResponse<T = unknown> {
@@ -62,7 +63,7 @@ class ApiService {
             const { authService } = await import('./auth.service');
             await authService.autoRefreshIfNeeded();
           } catch (error) {
-            console.warn('Auto-refresh failed:', error);
+            logger.warn('Auto-refresh failed', error);
           }
         }
         
@@ -76,7 +77,9 @@ class ApiService {
 
         // Log request in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
+          logger.debug('API Request', {
+            method: config.method?.toUpperCase(),
+            url: config.url,
             data: config.data,
             params: config.params,
           });
@@ -85,7 +88,7 @@ class ApiService {
         return config;
       },
       (error) => {
-        console.error('Request interceptor error:', error);
+        logger.error('Request interceptor error', error);
         return Promise.reject(error);
       }
     );
@@ -95,7 +98,9 @@ class ApiService {
       (response) => {
         // Log response in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+          logger.debug('API Response', {
+            method: response.config.method?.toUpperCase(),
+            url: response.config.url,
             status: response.status,
             data: response.data,
           });
@@ -108,7 +113,9 @@ class ApiService {
         
         // Log error in development
         if (process.env.NODE_ENV === 'development') {
-          console.error(`❌ API Error: ${config?.method?.toUpperCase()} ${config?.url}`, {
+          logger.error('API Error', {
+            method: config?.method?.toUpperCase(),
+            url: config?.url,
             status: error.response?.status,
             data: error.response?.data,
             message: error.message,
@@ -289,7 +296,11 @@ class ApiService {
     });
   }
 
-  // Batch requests
+  /**
+   * Batch multiple API requests
+   * @param requests - Array of request functions
+   * @returns Promise with array of results
+   */
   async batch<T>(requests: Array<() => Promise<ApiResponse<T>>>): Promise<ApiResponse<T>[]> {
     try {
       const results = await Promise.allSettled(requests.map(req => req()));
@@ -298,7 +309,7 @@ class ApiService {
         if (result.status === 'fulfilled') {
           return result.value;
         } else {
-          console.error(`Batch request ${index} failed:`, result.reason);
+          logger.error('Batch request failed', { index, reason: result.reason });
           return {
             success: false,
             error: {
@@ -309,7 +320,7 @@ class ApiService {
         }
       });
     } catch (error) {
-      console.error('Batch request error:', error);
+      logger.error('Batch request error', error);
       throw error;
     }
   }
