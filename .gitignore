@@ -9,6 +9,12 @@ coverage/
 */coverage/
 *.log
 
+# Test files with credentials
+working-auth-test.html
+test-auth.html
+*-test.html
+*-auth-test.html
+
 # Production
 /build
 /dist
