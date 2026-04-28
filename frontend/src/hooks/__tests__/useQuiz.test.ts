@@ -102,13 +102,20 @@ describe('useQuiz', () => {
 
     await act(async () => {
       await result.current.loadQuiz('1');
+    });
+
+    await act(async () => {
       result.current.selectAnswer(0, 0);
       result.current.selectAnswer(1, 1);
+    });
+
+    await act(async () => {
       await result.current.submitQuiz();
     });
 
     await waitFor(() => {
       expect(result.current.score).toBe(80);
+      expect(result.current.loading).toBe(false);
     });
   });
 });

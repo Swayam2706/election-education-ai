@@ -9,7 +9,7 @@ import {
   AuthError
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
-import { optimizedAPI } from './optimized-api';
+import { apiService } from './api.service';
 import { logger } from '../utils/logger';
 
 export interface AuthUser {
@@ -159,7 +159,7 @@ class FirebaseAuthService {
    */
   private async syncWithBackend(firebaseUser: User, token: string): Promise<{ user: AuthUser; token: string }> {
     try {
-      const response = await optimizedAPI.post('/auth/firebase-sync', {
+      const response = await apiService.post('/auth/firebase-sync', {
         firebaseUid: firebaseUser.uid,
         email: firebaseUser.email,
         name: firebaseUser.displayName,

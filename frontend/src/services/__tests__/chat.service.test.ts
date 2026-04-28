@@ -1,28 +1,35 @@
 import { chatService } from '../chat.service';
-import axios from 'axios';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+// Mock the base-api.service module properly as a class
+jest.mock('../base-api.service', () => {
+  return {
+    BaseApiService: class MockBaseApiService {
+      request = jest.fn();
+    },
+  };
+});
 
 describe('ChatService', () => {
+  let mockRequest: jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Get the mocked request function from the chatService instance
+    mockRequest = (chatService as any).api.request as jest.Mock;
   });
 
   describe('sendMessage', () => {
     it('should send message successfully', async () => {
       const mockResponse = {
+        success: true,
         data: {
-          success: true,
-          data: {
-            message: 'AI response',
-            sessionId: 'session-1',
-            timestamp: new Date().toISOString(),
-          },
+          message: 'AI response',
+          sessionId: 'session-1',
+          timestamp: new Date().toISOString(),
         },
       };
 
-      mockedAxios.request.mockResolvedValueOnce(mockResponse);
+      mockRequest.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.sendMessage('Hello');
 
@@ -32,17 +39,15 @@ describe('ChatService', () => {
 
     it('should handle session id', async () => {
       const mockResponse = {
+        success: true,
         data: {
-          success: true,
-          data: {
-            message: 'Response',
-            sessionId: 'existing-session',
-            timestamp: new Date().toISOString(),
-          },
+          message: 'Response',
+          sessionId: 'existing-session',
+          timestamp: new Date().toISOString(),
         },
       };
 
-      mockedAxios.request.mockResolvedValueOnce(mockResponse);
+      mockRequest.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.sendMessage('Hello', 'existing-session');
 
@@ -53,18 +58,16 @@ describe('ChatService', () => {
   describe('getChatHistory', () => {
     it('should fetch chat history', async () => {
       const mockResponse = {
+        success: true,
         data: {
-          success: true,
-          data: {
-            sessions: [
-              { id: '1', title: 'Chat 1', messages: [] },
-            ],
-            total: 1,
-          },
+          sessions: [
+            { id: '1', title: 'Chat 1', messages: [] },
+          ],
+          total: 1,
         },
       };
 
-      mockedAxios.request.mockResolvedValueOnce(mockResponse);
+      mockRequest.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.getChatHistory();
 
@@ -76,10 +79,10 @@ describe('ChatService', () => {
   describe('deleteChatSession', () => {
     it('should delete session', async () => {
       const mockResponse = {
-        data: { success: true },
+        success: true,
       };
 
-      mockedAxios.request.mockResolvedValueOnce(mockResponse);
+      mockRequest.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.deleteChatSession('session-1');
 

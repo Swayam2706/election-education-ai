@@ -1,5 +1,5 @@
-import { optimizedAPI } from './optimized-api';
 import { logger } from '../utils/logger';
+import { apiService } from './api.service';
 
 interface AnalyticsEvent {
   eventType: string;
@@ -23,7 +23,7 @@ export const analyticsService = {
   async trackEvent(eventType: string, eventData: Record<string, unknown>): Promise<void> {
     try {
       // Fire and forget - don't block UI
-      optimizedAPI.post<void>('/analytics/track', { eventType, eventData });
+      await apiService.post<void>('/analytics/track', { eventType, eventData });
     } catch (error) {
       // Silently fail - analytics shouldn't break the app
       logger.debug('Analytics tracking failed:', error);
@@ -31,10 +31,12 @@ export const analyticsService = {
   },
 
   async getRealTimeStats(): Promise<AnalyticsStats> {
-    return optimizedAPI.get<AnalyticsStats>('/analytics/stats');
+    const response = await apiService.get<AnalyticsStats>('/analytics/stats');
+    return response.data;
   },
 
   async getUserRecommendations(): Promise<UserRecommendation[]> {
-    return optimizedAPI.get<UserRecommendation[]>('/analytics/recommendations');
+    const response = await apiService.get<UserRecommendation[]>('/analytics/recommendations');
+    return response.data;
   },
 };
