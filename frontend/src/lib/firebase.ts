@@ -2,6 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GoogleAuthProvider } from 'firebase/auth';
 import { getAnalytics, Analytics, logEvent } from 'firebase/analytics';
 import { getPerformance, trace, Performance } from 'firebase/performance';
+import { logger } from '../utils/logger';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB0-pGjIEZQM1p-rT-np3pBJeRajKYJxP4",
@@ -46,9 +47,9 @@ if (!getApps().length) {
       }
     }
     
-    console.log('✅ Firebase initialized successfully with Analytics and Performance Monitoring');
+    logger.info('✅ Firebase initialized successfully with Analytics and Performance Monitoring');
   } catch (error) {
-    console.error('❌ Firebase initialization error:', error);
+    logger.error('❌ Firebase initialization error:', error);
   }
 } else {
   app = getApps()[0];

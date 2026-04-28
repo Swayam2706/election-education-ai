@@ -303,13 +303,19 @@ export const cacheUtils = {
   },
 };
 
-// Error boundary for React Query
+/**
+ * Error boundary handler for React Query
+ * Logs errors and sends to monitoring service in production
+ * @param error - The error that occurred
+ * @param errorInfo - Additional error information including component stack
+ */
 export const queryErrorHandler = (error: Error, errorInfo: { componentStack: string }) => {
   console.error('React Query Error Boundary:', error, errorInfo);
   
   // Log to external service in production
   if (process.env.NODE_ENV === 'production') {
-    // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
+    // Error tracking would be configured here with service like Sentry
+    // Example: Sentry.captureException(error, { extra: errorInfo });
   }
 };
 

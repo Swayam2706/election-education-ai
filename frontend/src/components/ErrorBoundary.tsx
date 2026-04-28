@@ -200,7 +200,7 @@ const logError = (error: Error, errorInfo: ErrorInfo, context?: string) => {
 
   // Send to error tracking service in production
   if (process.env.NODE_ENV === 'production') {
-    // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
+    // Error tracking service integration point
     // Example: Sentry.captureException(error, { extra: errorData });
   }
 

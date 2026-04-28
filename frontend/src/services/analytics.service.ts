@@ -1,4 +1,5 @@
 import { optimizedAPI } from './optimized-api';
+import { logger } from '../utils/logger';
 
 interface AnalyticsEvent {
   eventType: string;
@@ -25,7 +26,7 @@ export const analyticsService = {
       optimizedAPI.post<void>('/analytics/track', { eventType, eventData });
     } catch (error) {
       // Silently fail - analytics shouldn't break the app
-      console.error('Analytics tracking failed:', error);
+      logger.debug('Analytics tracking failed:', error);
     }
   },
 
