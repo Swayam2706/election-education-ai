@@ -1,4 +1,9 @@
-// Quiz Service - Domain-specific API abstraction
+/**
+ * Quiz Service
+ * Handles all quiz-related API operations including fetching quizzes,
+ * submitting answers, and retrieving quiz attempts
+ * @extends BaseApiService
+ */
 import BaseApiService from './base-api.service';
 import { ApiResponse, Quiz, QuizAttempt, Pagination } from '../types';
 

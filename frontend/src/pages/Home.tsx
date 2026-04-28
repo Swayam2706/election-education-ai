@@ -192,10 +192,10 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-balance"
           >
-            <span className="text-foreground">Understand</span>{' '}
-            <span className="gradient-text-hero">Democracy</span>
+            <span className="text-foreground">Master the</span>{' '}
+            <span className="gradient-text-hero">Election Process</span>
             <br />
-            <span className="text-foreground">Like Never Before</span>
+            <span className="text-foreground">Step by Step</span>
           </motion.h1>
 
           <motion.p
@@ -204,8 +204,8 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Your comprehensive AI-powered guide to election processes, voting rights, 
-            and democratic systems — interactive, accessible, and available in 3 languages.
+            Your interactive assistant to understand the election process, timelines, and steps 
+            in an easy-to-follow way — powered by AI, designed for every citizen.
           </motion.p>
 
           <motion.div
