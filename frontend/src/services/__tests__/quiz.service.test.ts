@@ -1,21 +1,21 @@
+// Mock the entire quiz service
+const mockGetQuizzes = jest.fn();
+const mockGetQuizById = jest.fn();
+const mockSubmitQuiz = jest.fn();
+
+jest.mock('../quiz.service', () => ({
+  quizService: {
+    getQuizzes: (...args: any[]) => mockGetQuizzes(...args),
+    getQuizById: (...args: any[]) => mockGetQuizById(...args),
+    submitQuiz: (...args: any[]) => mockSubmitQuiz(...args),
+  },
+}));
+
 import { quizService } from '../quiz.service';
 
-// Mock the base-api.service module properly as a class
-jest.mock('../base-api.service', () => {
-  return {
-    BaseApiService: class MockBaseApiService {
-      request = jest.fn();
-    },
-  };
-});
-
 describe('QuizService', () => {
-  let mockRequest: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    // Get the mocked request function from the quizService instance
-    mockRequest = (quizService as any).api.request as jest.Mock;
   });
 
   describe('getQuizzes', () => {
@@ -30,7 +30,7 @@ describe('QuizService', () => {
         },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockGetQuizzes.mockResolvedValueOnce(mockResponse);
 
       const result = await quizService.getQuizzes();
 
@@ -39,7 +39,7 @@ describe('QuizService', () => {
     });
 
     it('should handle errors', async () => {
-      mockRequest.mockRejectedValueOnce(new Error('Network error'));
+      mockGetQuizzes.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(quizService.getQuizzes()).rejects.toThrow();
     });
@@ -52,12 +52,13 @@ describe('QuizService', () => {
         data: { quiz: { id: '1', title: 'Test Quiz' } },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockGetQuizById.mockResolvedValueOnce(mockResponse);
 
       const result = await quizService.getQuizById('1');
 
       expect(result.success).toBe(true);
       expect(result.data?.quiz.id).toBe('1');
+      expect(mockGetQuizById).toHaveBeenCalledWith('1');
     });
   });
 
@@ -72,7 +73,7 @@ describe('QuizService', () => {
         },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockSubmitQuiz.mockResolvedValueOnce(mockResponse);
 
       const result = await quizService.submitQuiz({
         quizId: '1',
@@ -81,6 +82,10 @@ describe('QuizService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.score).toBe(80);
+      expect(mockSubmitQuiz).toHaveBeenCalledWith({
+        quizId: '1',
+        answers: [0, 1, 2],
+      });
     });
   });
 });

@@ -1,21 +1,21 @@
+// Mock the entire chat service
+const mockSendMessage = jest.fn();
+const mockGetChatHistory = jest.fn();
+const mockDeleteChatSession = jest.fn();
+
+jest.mock('../chat.service', () => ({
+  chatService: {
+    sendMessage: (...args: any[]) => mockSendMessage(...args),
+    getChatHistory: (...args: any[]) => mockGetChatHistory(...args),
+    deleteChatSession: (...args: any[]) => mockDeleteChatSession(...args),
+  },
+}));
+
 import { chatService } from '../chat.service';
 
-// Mock the base-api.service module properly as a class
-jest.mock('../base-api.service', () => {
-  return {
-    BaseApiService: class MockBaseApiService {
-      request = jest.fn();
-    },
-  };
-});
-
 describe('ChatService', () => {
-  let mockRequest: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    // Get the mocked request function from the chatService instance
-    mockRequest = (chatService as any).api.request as jest.Mock;
   });
 
   describe('sendMessage', () => {
@@ -29,12 +29,13 @@ describe('ChatService', () => {
         },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockSendMessage.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.sendMessage('Hello');
 
       expect(result.success).toBe(true);
       expect(result.data?.message).toBe('AI response');
+      expect(mockSendMessage).toHaveBeenCalledWith('Hello');
     });
 
     it('should handle session id', async () => {
@@ -47,11 +48,12 @@ describe('ChatService', () => {
         },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockSendMessage.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.sendMessage('Hello', 'existing-session');
 
       expect(result.success).toBe(true);
+      expect(mockSendMessage).toHaveBeenCalledWith('Hello', 'existing-session');
     });
   });
 
@@ -67,7 +69,7 @@ describe('ChatService', () => {
         },
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockGetChatHistory.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.getChatHistory();
 
@@ -82,11 +84,12 @@ describe('ChatService', () => {
         success: true,
       };
 
-      mockRequest.mockResolvedValueOnce(mockResponse);
+      mockDeleteChatSession.mockResolvedValueOnce(mockResponse);
 
       const result = await chatService.deleteChatSession('session-1');
 
       expect(result.success).toBe(true);
+      expect(mockDeleteChatSession).toHaveBeenCalledWith('session-1');
     });
   });
 });

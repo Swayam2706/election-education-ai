@@ -9,6 +9,27 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as any;
 global.ReadableStream = ReadableStream as any;
 
+// Mock useReducedMotion hook BEFORE Framer Motion
+jest.mock('./animations/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => false,
+  useMotionSafe: () => ({
+    prefersReducedMotion: false,
+    shouldAnimate: true,
+    getVariants: (normalVariants: any) => normalVariants,
+    getTransition: (normalTransition: any) => normalTransition,
+  }),
+  useAnimationConfig: () => ({
+    prefersReducedMotion: false,
+    shouldAnimate: true,
+    reducedMotionVariants: {},
+    fadeIn: (variants: any) => variants,
+    slideUp: (variants: any) => variants,
+    scaleIn: (variants: any) => variants,
+    fastTransition: (transition: any) => transition,
+    noTransition: () => ({}),
+  }),
+}));
+
 // Mock Framer Motion completely
 jest.mock('framer-motion', () => ({
   ...jest.requireActual('framer-motion'),
@@ -26,6 +47,28 @@ jest.mock('framer-motion', () => ({
   ),
   AnimatePresence: ({ children }: any) => children,
   useReducedMotion: () => false,
+}));
+
+// Mock Firebase Auth
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({
+    currentUser: null,
+    onAuthStateChanged: jest.fn(),
+  })),
+  GoogleAuthProvider: jest.fn(),
+  signInWithPopup: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+  onAuthStateChanged: jest.fn((auth, callback) => {
+    // Call callback immediately with null user
+    callback(null);
+    // Return unsubscribe function
+    return jest.fn();
+  }),
+  updateProfile: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+  sendEmailVerification: jest.fn(),
 }));
 
 // Mock axios
@@ -109,7 +152,13 @@ global.ResizeObserver = class ResizeObserver {
 
 // Mock Firebase
 jest.mock('./lib/firebase', () => ({
-  auth: {},
+  auth: {
+    currentUser: null,
+    onAuthStateChanged: jest.fn((callback: any) => {
+      callback(null);
+      return jest.fn();
+    }),
+  },
   googleProvider: {},
   analytics: null,
   performance: null,
