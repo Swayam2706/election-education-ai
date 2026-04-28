@@ -53,7 +53,6 @@ jest.mock('framer-motion', () => ({
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => ({
     currentUser: null,
-    onAuthStateChanged: jest.fn(),
   })),
   GoogleAuthProvider: jest.fn(),
   signInWithPopup: jest.fn(),
@@ -62,7 +61,7 @@ jest.mock('firebase/auth', () => ({
   signOut: jest.fn(),
   onAuthStateChanged: jest.fn((auth, callback) => {
     // Call callback immediately with null user
-    callback(null);
+    setTimeout(() => callback(null), 0);
     // Return unsubscribe function
     return jest.fn();
   }),
@@ -154,10 +153,6 @@ global.ResizeObserver = class ResizeObserver {
 jest.mock('./lib/firebase', () => ({
   auth: {
     currentUser: null,
-    onAuthStateChanged: jest.fn((callback: any) => {
-      callback(null);
-      return jest.fn();
-    }),
   },
   googleProvider: {},
   analytics: null,
