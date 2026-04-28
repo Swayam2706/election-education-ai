@@ -32,11 +32,26 @@ const dashboardRoutes = require('./routes/dashboard');
 const { authenticate } = require('./middleware/auth');
 const { validate } = require('./middleware/validation');
 const { cacheMiddleware } = require('./middleware/cache');
+const { cacheMiddleware: redisCacheMiddleware, initializeRedis } = require('./utils/redis-cache');
 const { securityHeaders, requestId, xssProtection } = require('./middleware/security');
 const { requestTiming, metricsCollector } = require('./middleware/performance');
+const { 
+  advancedXSSProtection, 
+  mongoSanitize, 
+  hpp, 
+  preventSQLInjection,
+  secureHeaders: enhancedSecureHeaders
+} = require('./middleware/security-enhanced');
 
 const app = express();
 const serverLogger = createLogger('Server');
+
+// Initialize Redis if available
+if (process.env.REDIS_URL) {
+  initializeRedis().catch(err => {
+    serverLogger.warn('Redis initialization failed, using in-memory cache', { error: err.message });
+  });
+}
 
 // Enterprise middleware setup
 const setupMiddleware = (app) => {
@@ -55,8 +70,13 @@ const setupMiddleware = (app) => {
 
   // Security middleware
   app.use(helmet(config.getSecurityConfig().helmet));
+  app.use(enhancedSecureHeaders);
   app.use(securityHeaders);
   app.use(requestId);
+  app.use(mongoSanitize);
+  app.use(hpp);
+  app.use(advancedXSSProtection);
+  app.use(preventSQLInjection);
   app.use(xssProtection);
 
   // Performance monitoring
@@ -64,8 +84,9 @@ const setupMiddleware = (app) => {
   app.use(metricsCollector());
 
   // CORS configuration
+  const corsOrigins = config.get('server.corsOrigin').split(',').map(origin => origin.trim());
   app.use(cors({
-    origin: config.get('server.corsOrigin'),
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -211,10 +232,10 @@ const setupRoutes = (app) => {
   }));
 
   // Apply caching to appropriate routes
-  app.use('/api/site', cacheMiddleware(600)); // 10 minutes
-  app.use('/api/content', cacheMiddleware(300)); // 5 minutes
-  app.use('/api/faq', cacheMiddleware(300)); // 5 minutes
-  app.use('/api/timeline', cacheMiddleware(300)); // 5 minutes
+  app.use('/api/site', redisCacheMiddleware(600), cacheMiddleware(600)); // 10 minutes
+  app.use('/api/content', redisCacheMiddleware(300), cacheMiddleware(300)); // 5 minutes
+  app.use('/api/faq', redisCacheMiddleware(300), cacheMiddleware(300)); // 5 minutes
+  app.use('/api/timeline', redisCacheMiddleware(300), cacheMiddleware(300)); // 5 minutes
 
   // API routes
   app.use('/api/auth', authRoutes);
@@ -298,7 +319,7 @@ const setupGracefulShutdown = (server) => {
     server.close(() => {
       serverLogger.info('HTTP server closed');
 
-      mongoose.connection.close(false, () => {
+      mongoose.connection.close(() => {
         serverLogger.info('MongoDB connection closed');
         process.exit(0);
       });

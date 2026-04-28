@@ -1,34 +1,64 @@
-import { optimizedAPI } from './optimized-api';
+// Site Service - Domain-specific API abstraction
+import BaseApiService from './base-api.service';
+import { ApiResponse } from '../types';
 
-export const siteService = {
-  async getNavigationLinks(language = 'en') {
-    return optimizedAPI.get(`/site/navigation?language=${language}`);
-  },
+interface SiteStats {
+  totalUsers: number;
+  totalQuizzes: number;
+  totalContent: number;
+  totalChats: number;
+}
 
-  async getFooterSections(language = 'en') {
-    return optimizedAPI.get(`/site/footer?language=${language}`);
-  },
+interface State {
+  code: string;
+  name: string;
+}
 
-  async getStatCards(language = 'en') {
-    return optimizedAPI.get(`/site/stats?language=${language}`);
-  },
+interface StateInfo {
+  name: string;
+  registrationDeadline: string;
+  idRequired: boolean;
+  acceptedIds?: string[];
+}
 
-  async getFeatureCards(language = 'en') {
-    return optimizedAPI.get(`/site/features?language=${language}`);
-  },
+interface EligibilityFormData {
+  age: string;
+  citizenship: string;
+  state: string;
+  registrationStatus: string;
+}
 
-  async getChatSuggestions(language = 'en', category?: string) {
-    const params = new URLSearchParams({ language });
-    if (category) params.append('category', category);
-    return optimizedAPI.get(`/site/chat-suggestions?${params}`);
-  },
+interface EligibilityResult {
+  eligible: boolean;
+  reasons?: string[];
+  recommendations?: string[];
+  nextSteps?: string[];
+}
 
-  async getPageContent(slug: string, language = 'en') {
-    return optimizedAPI.get(`/site/page/${slug}?language=${language}`);
-  },
+class SiteService extends BaseApiService {
+  private readonly endpoint = '/site';
+  private readonly eligibilityEndpoint = '/eligibility';
 
-  async getSiteSettings(key?: string) {
-    const params = key ? `?key=${key}` : '';
-    return optimizedAPI.get(`/site/settings${params}`);
-  },
-};
+  async getStats(): Promise<ApiResponse<{ stats: SiteStats }>> {
+    return this.get<{ stats: SiteStats }>(`${this.endpoint}/stats`);
+  }
+
+  async getSettings(): Promise<ApiResponse<{ settings: Record<string, unknown> }>> {
+    return this.get<{ settings: Record<string, unknown> }>(`${this.endpoint}/settings`);
+  }
+
+  async getEligibilityStates(): Promise<ApiResponse<{ states: State[] }>> {
+    return this.get<{ states: State[] }>(`${this.eligibilityEndpoint}/states`);
+  }
+
+  async getStateInfo(stateCode: string): Promise<ApiResponse<{ stateInfo: StateInfo }>> {
+    return this.get<{ stateInfo: StateInfo }>(`${this.eligibilityEndpoint}/state/${stateCode}`);
+  }
+
+  async checkEligibility(formData: EligibilityFormData): Promise<ApiResponse<EligibilityResult>> {
+    return this.post<EligibilityResult>(`${this.eligibilityEndpoint}/check`, formData);
+  }
+}
+
+export const siteService = new SiteService();
+export default siteService;

@@ -1,12 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const Joi = require('joi');
 const User = require('../models/User');
 const { authenticate, optionalAuth } = require('../middleware/auth');
 const { validate, authValidation, sanitizeInput } = require('../middleware/validation');
 const { asyncHandler, AuthenticationError, ConflictError } = require('../utils/errors');
 const { logger } = require('../utils/logger');
 const config = require('../utils/config');
+const { authSchemas } = require('../validation/schemas');
+const { validateInput: zodValidate, auditLog, failedAuthTracker } = require('../middleware/security-enhanced');
 
 const router = express.Router();
 
@@ -42,7 +43,9 @@ router.use(sanitizeInput);
 
 // Register with email/password
 router.post('/register', 
-  validate(authValidation.register), 
+  failedAuthTracker.middleware,
+  zodValidate(authSchemas.register),
+  auditLog('USER_REGISTRATION'),
   asyncHandler(async (req, res) => {
     const { email, password, name } = req.body;
 
@@ -55,6 +58,9 @@ router.post('/register',
     await user.save();
 
     const token = generateToken(user._id, user.email, user.role);
+
+    // Reset failed attempts on success
+    failedAuthTracker.reset(email);
 
     logger.auth('User registered', user._id, { 
       email: user.email,
@@ -83,13 +89,20 @@ router.post('/register',
 
 // Login with email/password
 router.post('/login', 
-  validate(authValidation.login), 
+  failedAuthTracker.middleware,
+  zodValidate(authSchemas.login),
+  auditLog('USER_LOGIN'),
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
       throw new AuthenticationError('Invalid email or password');
+    }
+
+    // Check if user has a password (Firebase users might not)
+    if (!user.password) {
+      throw new AuthenticationError('This account uses Google sign-in. Please use the Google sign-in button.');
     }
 
     const isMatch = await user.comparePassword(password);
@@ -103,6 +116,9 @@ router.post('/login',
     }
 
     const token = generateToken(user._id, user.email, user.role);
+
+    // Reset failed attempts on success
+    failedAuthTracker.reset(email);
 
     logger.auth('User logged in', user._id, { 
       email: user.email,
@@ -354,11 +370,7 @@ router.post('/refresh',
 
 // Check email availability
 router.post('/check-email',
-  validate({
-    body: Joi.object({
-      email: Joi.string().email().required()
-    })
-  }),
+  zodValidate(authSchemas.checkEmail),
   asyncHandler(async (req, res) => {
     const { email } = req.body;
     

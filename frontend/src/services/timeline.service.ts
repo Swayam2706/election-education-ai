@@ -1,39 +1,73 @@
-import { apiService } from './api.service';
+// Timeline Service - Domain-specific API abstraction
+import BaseApiService from './base-api.service';
+import { ApiResponse, TimelineEvent, Pagination } from '../types';
 
-export interface TimelineEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: string | null;
-  phase: string;
-  order: number;
-  icon: string | null;
-  language: string;
+interface TimelineListResponse {
+  events: TimelineEvent[];
+  pagination: Pagination;
 }
 
-export const timelineService = {
-  async getTimeline(params?: { 
-    language?: string; 
-    category?: string; 
-    year?: number;
-    status?: string;
-  }) {
-    const response = await apiService.get('/timeline', { params });
-    return response;
-  },
+interface TimelineDetailResponse {
+  event: TimelineEvent;
+}
 
-  async getTimelineEvent(id: string) {
-    const response = await apiService.get(`/timeline/${id}`);
-    return response;
-  },
+class TimelineService extends BaseApiService {
+  private readonly endpoint = '/timeline';
 
-  async getTimelineCategories() {
-    const response = await apiService.get('/timeline/categories');
-    return response;
-  },
-
-  async getTimelineYears() {
-    const response = await apiService.get('/timeline/years');
-    return response;
+  /**
+   * Get all timeline events with optional filters
+   */
+  async getEvents(params?: {
+    category?: string;
+    country?: string;
+    startDate?: string;
+    endDate?: string;
+    importance?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<TimelineListResponse>> {
+    return this.get<TimelineListResponse>(this.endpoint, {
+      params,
+    });
   }
-};
+
+  /**
+   * Get a specific timeline event by ID
+   */
+  async getEventById(eventId: string): Promise<ApiResponse<TimelineDetailResponse>> {
+    return this.get<TimelineDetailResponse>(`${this.endpoint}/${eventId}`);
+  }
+
+  /**
+   * Get timeline categories
+   */
+  async getCategories(): Promise<ApiResponse<{ categories: string[] }>> {
+    return this.get<{ categories: string[] }>(`${this.endpoint}/categories`);
+  }
+
+  /**
+   * Get timeline countries
+   */
+  async getCountries(): Promise<ApiResponse<{ countries: string[] }>> {
+    return this.get<{ countries: string[] }>(`${this.endpoint}/countries`);
+  }
+
+  /**
+   * Get events by year
+   */
+  async getEventsByYear(year: number): Promise<ApiResponse<{ events: TimelineEvent[] }>> {
+    return this.get<{ events: TimelineEvent[] }>(`${this.endpoint}/year/${year}`);
+  }
+
+  /**
+   * Get events by date range
+   */
+  async getEventsByDateRange(startDate: string, endDate: string): Promise<ApiResponse<{ events: TimelineEvent[] }>> {
+    return this.get<{ events: TimelineEvent[] }>(`${this.endpoint}/range`, {
+      params: { startDate, endDate },
+    });
+  }
+}
+
+export const timelineService = new TimelineService();
+export default timelineService;

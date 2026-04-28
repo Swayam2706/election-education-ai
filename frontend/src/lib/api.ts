@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://election-backend-success-1040323285919.us-central1.run.app/api';
 
 const api = axios.create({
   baseURL: API_URL,

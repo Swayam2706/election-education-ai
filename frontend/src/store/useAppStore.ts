@@ -52,13 +52,15 @@ interface UIState {
   };
 }
 
+interface CacheEntry {
+  value: unknown;
+  timestamp: number;
+  ttl: number;
+}
+
 interface CacheState {
   data: {
-    [key: string]: {
-      value: any;
-      timestamp: number;
-      ttl: number;
-    };
+    [key: string]: CacheEntry;
   };
 }
 
@@ -85,8 +87,8 @@ interface AppState extends AuthState, UIState, CacheState {
   setLoading: (key: string, loading: boolean) => void;
   
   // Cache actions
-  setCache: (key: string, value: any, ttl?: number) => void;
-  getCache: (key: string) => any;
+  setCache: (key: string, value: unknown, ttl?: number) => void;
+  getCache: (key: string) => unknown;
   clearCache: (key?: string) => void;
   
   // Utility actions
@@ -266,16 +268,16 @@ export const useAppStore = create<AppState>()(
           // Don't persist loading states, errors, or cache
         }),
         version: 1,
-        migrate: (persistedState: any, version: number) => {
+        migrate: (persistedState: Record<string, unknown>, version: number) => {
           // Handle state migrations if needed
           if (version === 0) {
             // Migration from version 0 to 1
             return {
               ...persistedState,
-              theme: persistedState.theme || 'system',
+              theme: (persistedState.theme as string) || 'system',
             };
           }
-          return persistedState;
+          return persistedState as AppState;
         },
       }
     )

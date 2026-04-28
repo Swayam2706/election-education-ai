@@ -1,49 +1,107 @@
-import { apiService } from './api.service';
+// Content Service - Domain-specific API abstraction
+import BaseApiService from './base-api.service';
+import { ApiResponse, Content, Pagination } from '../types';
 
-export interface EducationalContent {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  category: string;
-  language: string;
-  order: number;
-  createdAt: string;
-  updatedAt: string;
+interface ContentListResponse {
+  contents: Content[];
+  pagination: Pagination;
 }
 
-export const contentService = {
+interface ContentDetailResponse {
+  content: Content;
+}
+
+class ContentService extends BaseApiService {
+  private readonly endpoint = '/content';
+
+  /**
+   * Get all content articles with optional filters
+   */
   async getContents(params?: {
     category?: string;
-    language?: string;
+    difficulty?: string;
+    tags?: string[];
     search?: string;
-  }) {
-    const response = await apiService.get('/content', { params });
-    return response;
-  },
-
-  async getContentBySlug(slug: string) {
-    const response = await apiService.get(`/content/${slug}`);
-    return response;
-  },
-
-  async getContent(id: string) {
-    const response = await apiService.get(`/content/${id}`);
-    return response;
-  },
-
-  async getContentCategories() {
-    const response = await apiService.get('/content/categories');
-    return response;
-  },
-
-  async likeContent(id: string) {
-    const response = await apiService.post(`/content/${id}/like`);
-    return response;
-  },
-
-  async trackContentView(id: string) {
-    const response = await apiService.post(`/content/${id}/view`);
-    return response;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<ContentListResponse>> {
+    return this.get<ContentListResponse>(this.endpoint, {
+      params: {
+        ...params,
+        tags: params?.tags?.join(','),
+      },
+    });
   }
-};
+
+  /**
+   * Get a specific content article by ID
+   */
+  async getContentById(contentId: string): Promise<ApiResponse<ContentDetailResponse>> {
+    return this.get<ContentDetailResponse>(`${this.endpoint}/${contentId}`);
+  }
+
+  /**
+   * Get content by slug
+   */
+  async getContentBySlug(slug: string): Promise<ApiResponse<ContentDetailResponse>> {
+    return this.get<ContentDetailResponse>(`${this.endpoint}/slug/${slug}`);
+  }
+
+  /**
+   * Get featured content
+   */
+  async getFeaturedContent(limit: number = 5): Promise<ApiResponse<{ contents: Content[] }>> {
+    return this.get<{ contents: Content[] }>(`${this.endpoint}/featured`, {
+      params: { limit },
+    });
+  }
+
+  /**
+   * Get related content
+   */
+  async getRelatedContent(contentId: string, limit: number = 5): Promise<ApiResponse<{ contents: Content[] }>> {
+    return this.get<{ contents: Content[] }>(`${this.endpoint}/${contentId}/related`, {
+      params: { limit },
+    });
+  }
+
+  /**
+   * Track content read
+   */
+  async trackRead(contentId: string): Promise<ApiResponse<void>> {
+    return this.post<void>(`${this.endpoint}/${contentId}/read`);
+  }
+
+  /**
+   * Get content categories
+   */
+  async getCategories(): Promise<ApiResponse<{ categories: string[] }>> {
+    return this.get<{ categories: string[] }>(`${this.endpoint}/categories`);
+  }
+
+  /**
+   * Get content tags
+   */
+  async getTags(): Promise<ApiResponse<{ tags: string[] }>> {
+    return this.get<{ tags: string[] }>(`${this.endpoint}/tags`);
+  }
+
+  /**
+   * Search content
+   */
+  async searchContent(query: string, params?: {
+    category?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<ContentListResponse>> {
+    return this.get<ContentListResponse>(`${this.endpoint}/search`, {
+      params: {
+        q: query,
+        ...params,
+      },
+    });
+  }
+}
+
+export const contentService = new ContentService();
+export default contentService;

@@ -14,9 +14,10 @@ const defaultQueryOptions: DefaultOptions = {
     gcTime: 10 * 60 * 1000,
     
     // Retry configuration
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on 4xx errors (client errors)
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+      const apiError = error as { response?: { status?: number } };
+      if (apiError?.response?.status && apiError.response.status >= 400 && apiError.response.status < 500) {
         return false;
       }
       
@@ -48,12 +49,14 @@ const defaultQueryOptions: DefaultOptions = {
 
 // Query cache configuration
 const queryCache = new QueryCache({
-  onError: (error: any, query) => {
+  onError: (error: unknown, query) => {
+    const apiError = error as { message?: string; response?: { status?: number; data?: { error?: { message?: string } } } };
+    
     // Log query errors
     console.error('Query error:', {
       queryKey: query.queryKey,
-      error: error.message,
-      status: error?.response?.status,
+      error: apiError.message,
+      status: apiError?.response?.status,
     });
 
     // Don't show toast for background refetches
@@ -62,7 +65,7 @@ const queryCache = new QueryCache({
     }
 
     // Show error toast for failed queries
-    const errorMessage = error?.response?.data?.error?.message || error.message || 'Something went wrong';
+    const errorMessage = apiError?.response?.data?.error?.message || apiError.message || 'Something went wrong';
     toast.error(errorMessage);
   },
   
@@ -79,18 +82,20 @@ const queryCache = new QueryCache({
 
 // Mutation cache configuration
 const mutationCache = new MutationCache({
-  onError: (error: any, variables, context, mutation) => {
+  onError: (error: unknown, variables, context, mutation) => {
+    const apiError = error as { message?: string; response?: { status?: number; data?: { error?: { message?: string } } } };
+    
     // Log mutation errors
     console.error('Mutation error:', {
       mutationKey: mutation.options.mutationKey,
-      error: error.message,
-      status: error?.response?.status,
+      error: apiError.message,
+      status: apiError?.response?.status,
       variables,
     });
 
     // Show error toast (unless explicitly disabled)
     if (!mutation.options.meta?.skipErrorToast) {
-      const errorMessage = error?.response?.data?.error?.message || error.message || 'Operation failed';
+      const errorMessage = apiError?.response?.data?.error?.message || apiError.message || 'Operation failed';
       toast.error(errorMessage);
     }
   },
@@ -130,7 +135,7 @@ export const queryKeys = {
   // Users
   users: {
     all: () => ['users'] as const,
-    list: (filters?: any) => ['users', 'list', filters] as const,
+    list: (filters?: Record<string, unknown>) => ['users', 'list', filters] as const,
     detail: (id: string) => ['users', 'detail', id] as const,
     stats: (id: string) => ['users', 'stats', id] as const,
   },
@@ -138,15 +143,15 @@ export const queryKeys = {
   // Content
   content: {
     all: () => ['content'] as const,
-    list: (type?: string, filters?: any) => ['content', 'list', type, filters] as const,
+    list: (type?: string, filters?: Record<string, unknown>) => ['content', 'list', type, filters] as const,
     detail: (id: string) => ['content', 'detail', id] as const,
-    search: (query: string, filters?: any) => ['content', 'search', query, filters] as const,
+    search: (query: string, filters?: Record<string, unknown>) => ['content', 'search', query, filters] as const,
   },
   
   // Quizzes
   quizzes: {
     all: () => ['quizzes'] as const,
-    list: (filters?: any) => ['quizzes', 'list', filters] as const,
+    list: (filters?: Record<string, unknown>) => ['quizzes', 'list', filters] as const,
     detail: (id: string) => ['quizzes', 'detail', id] as const,
     attempts: (userId: string) => ['quizzes', 'attempts', userId] as const,
     attempt: (id: string) => ['quizzes', 'attempt', id] as const,
@@ -155,14 +160,14 @@ export const queryKeys = {
   // Timeline
   timeline: {
     all: () => ['timeline'] as const,
-    events: (filters?: any) => ['timeline', 'events', filters] as const,
+    events: (filters?: Record<string, unknown>) => ['timeline', 'events', filters] as const,
     event: (id: string) => ['timeline', 'event', id] as const,
   },
   
   // FAQ
   faq: {
     all: () => ['faq'] as const,
-    list: (filters?: any) => ['faq', 'list', filters] as const,
+    list: (filters?: Record<string, unknown>) => ['faq', 'list', filters] as const,
     detail: (id: string) => ['faq', 'detail', id] as const,
     categories: () => ['faq', 'categories'] as const,
   },
@@ -194,37 +199,37 @@ export const queryKeys = {
   // Admin
   admin: {
     all: () => ['admin'] as const,
-    users: (filters?: any) => ['admin', 'users', filters] as const,
-    content: (filters?: any) => ['admin', 'content', filters] as const,
+    users: (filters?: Record<string, unknown>) => ['admin', 'users', filters] as const,
+    content: (filters?: Record<string, unknown>) => ['admin', 'content', filters] as const,
     analytics: () => ['admin', 'analytics'] as const,
-    logs: (filters?: any) => ['admin', 'logs', filters] as const,
+    logs: (filters?: Record<string, unknown>) => ['admin', 'logs', filters] as const,
   },
 };
 
 // Utility functions for cache management
 export const cacheUtils = {
   // Invalidate all queries for a specific key pattern
-  invalidateQueries: (queryKey: any[]) => {
+  invalidateQueries: (queryKey: readonly unknown[]) => {
     return queryClient.invalidateQueries({ queryKey });
   },
   
   // Remove specific query from cache
-  removeQueries: (queryKey: any[]) => {
+  removeQueries: (queryKey: readonly unknown[]) => {
     return queryClient.removeQueries({ queryKey });
   },
   
   // Set query data manually
-  setQueryData: <T>(queryKey: any[], data: T) => {
+  setQueryData: <T>(queryKey: readonly unknown[], data: T) => {
     return queryClient.setQueryData(queryKey, data);
   },
   
   // Get query data from cache
-  getQueryData: <T>(queryKey: any[]): T | undefined => {
+  getQueryData: <T>(queryKey: readonly unknown[]): T | undefined => {
     return queryClient.getQueryData(queryKey);
   },
   
   // Prefetch query
-  prefetchQuery: (queryKey: any[], queryFn: () => Promise<any>) => {
+  prefetchQuery: (queryKey: readonly unknown[], queryFn: () => Promise<unknown>) => {
     return queryClient.prefetchQuery({
       queryKey,
       queryFn,
@@ -252,9 +257,9 @@ export const cacheUtils = {
   },
   
   // Update user stats optimistically
-  updateUserStats: (userId: string, stats: any) => {
+  updateUserStats: (userId: string, stats: Record<string, unknown>) => {
     const userKey = queryKeys.users.detail(userId);
-    const currentData = queryClient.getQueryData(userKey) as any;
+    const currentData = queryClient.getQueryData(userKey) as { data?: { user?: { stats?: Record<string, unknown> } } } | undefined;
     
     if (currentData?.data?.user) {
       queryClient.setQueryData(userKey, {
@@ -274,7 +279,7 @@ export const cacheUtils = {
     
     // Also update auth user data
     const authKey = queryKeys.auth.me();
-    const authData = queryClient.getQueryData(authKey) as any;
+    const authData = queryClient.getQueryData(authKey) as { data?: { user?: { stats?: Record<string, unknown> } } } | undefined;
     
     if (authData?.data?.user) {
       queryClient.setQueryData(authKey, {
@@ -299,7 +304,7 @@ export const cacheUtils = {
 };
 
 // Error boundary for React Query
-export const queryErrorHandler = (error: Error, errorInfo: any) => {
+export const queryErrorHandler = (error: Error, errorInfo: { componentStack: string }) => {
   console.error('React Query Error Boundary:', error, errorInfo);
   
   // Log to external service in production

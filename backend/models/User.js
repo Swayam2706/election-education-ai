@@ -82,6 +82,9 @@ userSchema.pre('save', async function(next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) {
+    throw new Error('No password set for this user');
+  }
   return bcrypt.compare(candidatePassword, this.password);
 };
 

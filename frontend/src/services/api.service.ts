@@ -5,13 +5,13 @@ import toast from 'react-hot-toast';
 import { useAppStore } from '../store/useAppStore';
 
 // Types
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: {
     message: string;
     code: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
   meta?: {
     pagination?: {
@@ -37,7 +37,7 @@ class ApiService {
   private requestQueue: Map<string, Promise<any>> = new Map();
 
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+    this.baseURL = process.env.REACT_APP_API_URL || 'https://election-backend-success-1040323285919.us-central1.run.app/api';
     
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -184,7 +184,7 @@ class ApiService {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getCacheKey(method: string, url: string, params?: any, data?: any): string {
+  private getCacheKey(method: string, url: string, params?: Record<string, unknown>, data?: unknown): string {
     let key = `${method}:${url}`;
     if (params) {
       key += `:params:${JSON.stringify(params)}`;
@@ -248,15 +248,15 @@ class ApiService {
     return this.makeRequest<T>('GET', url, config);
   }
 
-  async post<T>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  async post<T>(url: string, data?: unknown, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     return this.makeRequest<T>('POST', url, { ...config, data });
   }
 
-  async put<T>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  async put<T>(url: string, data?: unknown, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     return this.makeRequest<T>('PUT', url, { ...config, data });
   }
 
-  async patch<T>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  async patch<T>(url: string, data?: unknown, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     return this.makeRequest<T>('PATCH', url, { ...config, data });
   }
 

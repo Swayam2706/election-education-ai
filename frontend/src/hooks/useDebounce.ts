@@ -1,21 +1,20 @@
+// Custom hook for debouncing values
 import { useState, useEffect } from 'react';
 
 /**
- * Debounce hook for optimizing search and input handlers
- * @param value - Value to debounce
- * @param delay - Delay in milliseconds (default: 300ms)
- * @returns Debounced value
+ * Debounces a value by delaying updates until after a specified delay
+ * @param value - The value to debounce
+ * @param delay - The delay in milliseconds (default: 500ms)
+ * @returns The debounced value
  */
-export function useDebounce<T>(value: T, delay: number = 300): T {
+export function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    // Set up the timeout
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // Clean up the timeout if value changes before delay
     return () => {
       clearTimeout(handler);
     };
@@ -24,27 +23,4 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
   return debouncedValue;
 }
 
-/**
- * Debounce callback hook
- * @param callback - Function to debounce
- * @param delay - Delay in milliseconds (default: 300ms)
- * @returns Debounced callback
- */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number = 300
-): (...args: Parameters<T>) => void {
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-
-  return (...args: Parameters<T>) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    const newTimeoutId = setTimeout(() => {
-      callback(...args);
-    }, delay);
-
-    setTimeoutId(newTimeoutId);
-  };
-}
+export default useDebounce;

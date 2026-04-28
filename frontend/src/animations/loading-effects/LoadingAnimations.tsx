@@ -7,8 +7,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { useAnimationConfig } from '../hooks/useReducedMotion';
-import { pulseGlow, shimmer } from '../variants';
-import { transitions } from '../transitions';
 
 // ─── Skeleton Loader ───
 interface SkeletonProps {

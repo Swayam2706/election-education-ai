@@ -79,7 +79,7 @@ const errorHandler = (err, req, res, next) => {
       error = new AuthenticationError('Token expired');
     } else {
       error = new AppError(
-        process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message,
+        err.message || 'Something went wrong',
         500,
         'INTERNAL_ERROR'
       );

@@ -83,12 +83,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authStore.setAuthError(null);
 
     try {
+      // Track analytics
+      if (typeof window !== 'undefined') {
+        const { trackEvent } = await import('../lib/firebase');
+        trackEvent('login_attempt', { method: 'google' });
+      }
+
       // signInWithPopup triggers onAuthStateChanged which does the backend sync
       await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged handles the rest — don't navigate here,
-      // let the caller (Login page) handle navigation after isAuthenticated becomes true
+      
+      // Track successful login
+      if (typeof window !== 'undefined') {
+        const { trackEvent } = await import('../lib/firebase');
+        trackEvent('login_success', { method: 'google' });
+      }
     } catch (err: any) {
       authStore.setAuthLoading(false);
+      
+      // Track failed login
+      if (typeof window !== 'undefined') {
+        const { trackEvent } = await import('../lib/firebase');
+        trackEvent('login_failed', { method: 'google', error: err.code });
+      }
+      
       const msg =
         err.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled' :
         err.code === 'auth/popup-blocked'         ? 'Popup blocked — please allow popups' :
@@ -99,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.error(msg);
       throw err;
     }
-    // NOTE: do NOT set loading false here — onAuthStateChanged will do it
   };
 
   // ── Email sign-in ─────────────────────────────────────────────────────────

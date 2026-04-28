@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { apiService } from '../services/api.service';
+import { dashboardService } from '../services/dashboard.service';
 import { queryKeys } from '../lib/react-query';
 import { Loading, CardSkeleton, ListSkeleton } from '../components/Loading';
 import { ComponentErrorBoundary } from '../components/ErrorBoundary';
@@ -61,10 +61,7 @@ interface DashboardStats {
 // Dashboard API functions
 const dashboardAPI = {
   getStats: async () => {
-    const response = await apiService.get('/dashboard/stats', {
-      cache: true,
-      cacheTTL: 300000, // 5 minutes
-    });
+    const response = await dashboardService.getStats();
     
     if (response.success && response.data) {
       return response.data;
@@ -74,10 +71,7 @@ const dashboardAPI = {
   },
   
   getUserProgress: async () => {
-    const response = await apiService.get('/dashboard/progress', {
-      cache: true,
-      cacheTTL: 60000, // 1 minute
-    });
+    const response = await dashboardService.getUserProgress();
     
     if (response.success && response.data) {
       return response.data;

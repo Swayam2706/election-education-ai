@@ -2,10 +2,10 @@
  * Performance Optimization Utilities
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Debounce function
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -21,7 +21,7 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 // Throttle function
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -73,8 +73,8 @@ export const useIntersectionObserver = (
 };
 
 // Memoize expensive calculations
-export function memoize<T extends (...args: any[]) => any>(fn: T): T {
-  const cache = new Map();
+export function memoize<T extends (...args: unknown[]) => unknown>(fn: T): T {
+  const cache = new Map<string, unknown>();
   return ((...args: Parameters<T>) => {
     const key = JSON.stringify(args);
     if (cache.has(key)) {
@@ -128,7 +128,15 @@ export const preloadResource = (url: string, as: string) => {
 };
 
 // Web Vitals tracking
-export const reportWebVitals = (onPerfEntry?: (metric: any) => void) => {
+interface WebVitalsMetric {
+  name: string;
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  delta: number;
+  id: string;
+}
+
+export const reportWebVitals = (onPerfEntry?: (metric: WebVitalsMetric) => void) => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
     import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
       onCLS(onPerfEntry);

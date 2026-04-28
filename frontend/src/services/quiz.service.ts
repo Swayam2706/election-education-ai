@@ -1,82 +1,103 @@
-import { apiService } from './api.service';
+// Quiz Service - Domain-specific API abstraction
+import BaseApiService from './base-api.service';
+import { ApiResponse, Quiz, QuizAttempt, Pagination } from '../types';
 
-export interface Quiz {
-  id: string;
-  title: string;
-  description: string | null;
-  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  category: string;
-  language: string;
-  timeLimit: number | null;
-  questions: QuizQuestion[];
+interface QuizListResponse {
+  quizzes: Quiz[];
+  pagination: Pagination;
 }
 
-export interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  order: number;
-  points: number;
-}
-
-export interface QuizAttempt {
-  id: string;
+interface QuizDetailResponse {
   quiz: Quiz;
-  score: number;
-  percentage: number;
-  timeSpent: number;
-  completed: boolean;
-  createdAt: string;
 }
 
-export interface QuizResult {
-  attemptId: string;
+interface QuizAttemptResponse {
+  attempt: QuizAttempt;
   score: number;
-  totalQuestions: number;
-  results: Record<string, boolean>;
+  passed: boolean;
 }
 
-export const quizService = {
-  async getQuizzes(params?: { category?: string; difficulty?: string; search?: string }) {
-    const response = await apiService.get('/quiz', { params });
-    return response;
-  },
+interface QuizAttemptsResponse {
+  attempts: QuizAttempt[];
+  pagination: Pagination;
+}
 
-  async getQuiz(id: string) {
-    const response = await apiService.get(`/quiz/${id}`);
-    return response;
-  },
+interface SubmitQuizRequest {
+  quizId: string;
+  answers: number[];
+  timeSpent?: number;
+}
 
-  async submitQuiz(data: {
-    quizId: string;
-    answers: Array<{
-      questionIndex: number;
-      selectedAnswer: number;
-      timeSpent: number;
-    }>;
-    timeSpent: number;
-  }) {
-    const response = await apiService.post('/quiz/submit', data);
-    return response;
-  },
+class QuizService extends BaseApiService {
+  private readonly endpoint = '/quiz';
 
-  async getUserAttempts() {
-    const response = await apiService.get('/quiz/attempts');
-    return response;
-  },
-
-  async getQuizAttempt(id: string) {
-    const response = await apiService.get(`/quiz/attempts/${id}`);
-    return response;
-  },
-
-  async getQuizCategories() {
-    const response = await apiService.get('/quiz/categories');
-    return response;
-  },
-
-  async getQuizStats() {
-    const response = await apiService.get('/quiz/stats');
-    return response;
+  /**
+   * Get all quizzes with optional filters
+   */
+  async getQuizzes(params?: {
+    category?: string;
+    difficulty?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<QuizListResponse>> {
+    return this.get<QuizListResponse>(this.endpoint, {
+      params,
+    });
   }
-};
+
+  /**
+   * Get a specific quiz by ID
+   */
+  async getQuizById(quizId: string): Promise<ApiResponse<QuizDetailResponse>> {
+    return this.get<QuizDetailResponse>(`${this.endpoint}/${quizId}`);
+  }
+
+  /**
+   * Submit quiz answers
+   */
+  async submitQuiz(data: SubmitQuizRequest): Promise<ApiResponse<QuizAttemptResponse>> {
+    return this.post<QuizAttemptResponse>(`${this.endpoint}/submit`, data);
+  }
+
+  /**
+   * Get user's quiz attempts
+   */
+  async getMyAttempts(params?: {
+    quizId?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<QuizAttemptsResponse>> {
+    return this.get<QuizAttemptsResponse>(`${this.endpoint}/attempts`, {
+      params,
+    });
+  }
+
+  /**
+   * Get a specific quiz attempt
+   */
+  async getAttemptById(attemptId: string): Promise<ApiResponse<{ attempt: QuizAttempt }>> {
+    return this.get<{ attempt: QuizAttempt }>(`${this.endpoint}/attempts/${attemptId}`);
+  }
+
+  /**
+   * Get quiz statistics
+   */
+  async getQuizStats(quizId: string): Promise<ApiResponse<{
+    totalAttempts: number;
+    averageScore: number;
+    passRate: number;
+    userBestScore?: number;
+  }>> {
+    return this.get(`${this.endpoint}/${quizId}/stats`);
+  }
+
+  /**
+   * Get quiz categories
+   */
+  async getCategories(): Promise<ApiResponse<{ categories: string[] }>> {
+    return this.get<{ categories: string[] }>(`${this.endpoint}/categories`);
+  }
+}
+
+export const quizService = new QuizService();
+export default quizService;

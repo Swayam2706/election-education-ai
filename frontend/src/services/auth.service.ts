@@ -109,8 +109,9 @@ class AuthService {
       } else {
         throw new Error(response.error?.message || 'Login failed');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || error.message || 'Login failed';
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      const errorMessage = apiError.response?.data?.error?.message || apiError.message || 'Login failed';
       store.setAuthError(errorMessage);
       throw error;
     } finally {
@@ -139,8 +140,9 @@ class AuthService {
       } else {
         throw new Error(response.error?.message || 'Registration failed');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || error.message || 'Registration failed';
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      const errorMessage = apiError.response?.data?.error?.message || apiError.message || 'Registration failed';
       store.setAuthError(errorMessage);
       throw error;
     } finally {
@@ -169,8 +171,9 @@ class AuthService {
       } else {
         throw new Error(response.error?.message || 'Firebase sync failed');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || error.message || 'Firebase sync failed';
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      const errorMessage = apiError.response?.data?.error?.message || apiError.message || 'Firebase sync failed';
       store.setAuthError(errorMessage);
       throw error;
     } finally {
@@ -208,8 +211,9 @@ class AuthService {
       } else {
         throw new Error(response.error?.message || 'Profile update failed');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || error.message || 'Profile update failed';
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      const errorMessage = apiError.response?.data?.error?.message || apiError.message || 'Profile update failed';
       toast.error(errorMessage);
       throw error;
     }
@@ -229,8 +233,9 @@ class AuthService {
       } else {
         throw new Error(response.error?.message || 'Password change failed');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || error.message || 'Password change failed';
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      const errorMessage = apiError.response?.data?.error?.message || apiError.message || 'Password change failed';
       toast.error(errorMessage);
       throw error;
     }

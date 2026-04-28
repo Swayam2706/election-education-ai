@@ -71,6 +71,16 @@ class Logger {
   http(message, meta = {}) {
     logger.info(message, { context: 'HTTP', ...meta });
   }
+
+  // Audit logging for compliance
+  audit(action, meta = {}) {
+    logger.info(`Audit: ${action}`, {
+      context: 'Audit',
+      type: 'AUDIT',
+      ...meta,
+      timestamp: new Date().toISOString()
+    });
+  }
 }
 
 // Create default logger instance
