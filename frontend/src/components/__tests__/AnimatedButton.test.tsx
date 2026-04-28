@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AnimatedButton } from '../animations/motion-components/AnimatedButton';
+import { AnimatedButton } from '../../animations/motion-components/AnimatedButton';
 
 describe('AnimatedButton', () => {
   it('renders button with text', () => {
