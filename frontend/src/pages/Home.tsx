@@ -23,7 +23,7 @@ const fadeUpVariant = {
   show: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] } }),
 };
 
-const AnimatedSection = memo(({ children, className }) => {
+const AnimatedSection = memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   return (
@@ -42,7 +42,14 @@ const AnimatedSection = memo(({ children, className }) => {
 AnimatedSection.displayName = 'AnimatedSection';
 
 /* ─── Components ─── */
-const EnhancedStatCard = memo(({ value, label, icon, index }) => {
+interface StatCardProps {
+  value: string;
+  label: string;
+  icon: React.ReactNode;
+  index: number;
+}
+
+const EnhancedStatCard = memo(({ value, label, icon, index }: StatCardProps) => {
   // Check if value contains non-numeric characters (like ratings)
   const isNumericOnly = /^\d+\+?$/.test(value);
   
@@ -64,7 +71,19 @@ const EnhancedStatCard = memo(({ value, label, icon, index }) => {
 
 EnhancedStatCard.displayName = 'EnhancedStatCard';
 
-const EnhancedFeatureCard = memo(({ feature, index }) => {
+interface FeatureCardProps {
+  feature: {
+    id: number;
+    title: string;
+    description: string;
+    badge: string;
+    href: string;
+    color: string;
+  };
+  index: number;
+}
+
+const EnhancedFeatureCard = memo(({ feature, index }: FeatureCardProps) => {
   const handleClick = useCallback(() => {
     analyticsService.trackEvent('feature_card_click', { 
       feature: feature.title,
