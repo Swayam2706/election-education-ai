@@ -30,9 +30,6 @@ export default function Register() {
 
   const isGoogleAuthAvailable = auth && googleProvider;
 
-  /**
-   * Handle email/password registration
-   */
   const handleEmailSignup = async (formData: { email: string; password: string; name: string }) => {
     try {
       await signUpWithEmail(formData.email, formData.password, formData.name);
@@ -42,9 +39,6 @@ export default function Register() {
     }
   };
 
-  /**
-   * Handle Google OAuth sign-up
-   */
   const handleGoogleSignup = async () => {
     try {
       await signInWithGoogle();
@@ -160,16 +154,6 @@ export default function Register() {
                     {error}
                   </motion.div>
                 )}
-
-                {/* Email/Password Form */}
-                <EmailSignUpForm
-                  onSubmit={handleEmailSignup}
-                  isLoading={isLoading}
-                  onBackToGoogle={() => setShowEmailForm(false)}
-                  showBackButton={isGoogleAuthAvailable}
-                />
-              </>
-            )}
 
                 {/* Email/Password Form */}
                 <EmailSignUpForm
