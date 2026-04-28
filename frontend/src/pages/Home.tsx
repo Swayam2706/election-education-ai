@@ -8,6 +8,7 @@ import {
 import { useStatCards, useFeatureCards } from '../hooks/useSiteData';
 import { analyticsService } from '../services/analytics.service';
 import { siteService } from '../services/site.service';
+import { logger } from '../utils/logger';
 
 // Enhanced Animation Components
 import { AnimatedContainer, StaggerContainer } from '../animations/motion-components/AnimatedContainer';
@@ -107,7 +108,7 @@ export default function Home() {
           ]);
         }
       } catch (error) {
-        console.error('Failed to load stats:', error);
+        logger.error('Failed to load stats', error);
         // Fallback to default stats
         setStats([
           { id: 1, value: '10K+', label: 'Active Users', icon: 'Users' },

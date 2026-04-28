@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { contentService } from '../services/content.service';
+import { logger } from '../utils/logger';
 import ReactMarkdown from 'react-markdown';
 
 export default function LearnArticle() {
@@ -21,7 +22,7 @@ export default function LearnArticle() {
           setError('Article not found');
         }
       } catch (error) {
-        console.error('Failed to load article:', error);
+        logger.error('Failed to load article', error);
         setError('Failed to load article');
       } finally {
         setLoading(false);

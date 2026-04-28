@@ -81,7 +81,7 @@ export default function QuizDetail() {
         setError('Quiz not found');
       }
     } catch (err) {
-      console.error('Failed to load quiz:', err);
+      logger.error('Failed to load quiz', err);
       setError('Failed to load quiz');
     } finally {
       setLoading(false);
@@ -154,7 +154,7 @@ export default function QuizDetail() {
         throw new Error(response.error?.message || 'Failed to submit quiz');
       }
     } catch (err) {
-      console.error('Failed to submit quiz:', err);
+      logger.error('Failed to submit quiz', err);
       toast.error('Failed to submit quiz. Please try again.');
     } finally {
       setSubmitting(false);
