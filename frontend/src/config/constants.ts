@@ -78,6 +78,44 @@ export const ANIMATION_DURATIONS = {
   fast: 150,
   normal: 300,
   slow: 500,
+  transition: 200,
+  hover: 400,
+} as const;
+
+export const TIMING = {
+  // Debounce delays
+  DEBOUNCE_SEARCH: 300,
+  DEBOUNCE_INPUT: 500,
+  
+  // Retry delays
+  RETRY_BASE_DELAY: 1000,
+  RETRY_MAX_DELAY: 30000,
+  
+  // Timeout values
+  API_TIMEOUT: 30000,
+  HEALTH_CHECK_TIMEOUT: 5000,
+  
+  // Intervals
+  TOKEN_REFRESH_INTERVAL: 6 * 60 * 60 * 1000, // 6 hours
+  TOKEN_EXPIRY_BUFFER: 6 * 24 * 60 * 60 * 1000, // 6 days
+  
+  // UI delays
+  TOAST_DURATION: 3000,
+  ANNOUNCEMENT_DURATION: 1000,
+  QUIZ_TIMER_INTERVAL: 1000,
+  
+  // Time conversions
+  MILLISECONDS_PER_SECOND: 1000,
+  SECONDS_PER_MINUTE: 60,
+  MINUTES_PER_HOUR: 60,
+  HOURS_PER_DAY: 24,
+} as const;
+
+export const SCORE_THRESHOLDS = {
+  EXCELLENT: 90,
+  GOOD: 70,
+  AVERAGE: 50,
+  POOR: 0,
 } as const;
 
 export const BREAKPOINTS = {

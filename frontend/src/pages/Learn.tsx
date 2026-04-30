@@ -5,6 +5,7 @@ import { contentService } from '../services/content.service';
 import { ComponentErrorBoundary } from '../components/ErrorBoundary';
 import { useDebounce } from '../hooks/useDebounce';
 import { logger } from '../utils/logger';
+import { TIMING } from '../config/constants';
 
 // Memoized Article Card Component
 const ArticleCard = React.memo(({ article }) => {
@@ -53,7 +54,7 @@ function LearnContent() {
   const [search, setSearch] = useState('');
   
   // Debounce search to reduce API calls
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, TIMING.DEBOUNCE_SEARCH);
 
   useEffect(() => {
     const loadContent = async () => {

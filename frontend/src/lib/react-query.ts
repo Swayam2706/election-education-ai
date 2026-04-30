@@ -3,21 +3,22 @@
 import { QueryClient, DefaultOptions, MutationCache, QueryCache } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAppStore } from '../store/useAppStore';
+import { TIMING, HTTP_STATUS } from '../config/constants';
 
 // Default query options
 const defaultQueryOptions: DefaultOptions = {
   queries: {
     // Stale time: 5 minutes
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * TIMING.SECONDS_PER_MINUTE * TIMING.MILLISECONDS_PER_SECOND,
     
     // Cache time: 10 minutes
-    gcTime: 10 * 60 * 1000,
+    gcTime: 10 * TIMING.SECONDS_PER_MINUTE * TIMING.MILLISECONDS_PER_SECOND,
     
     // Retry configuration
     retry: (failureCount, error: unknown) => {
       // Don't retry on 4xx errors (client errors)
       const apiError = error as { response?: { status?: number } };
-      if (apiError?.response?.status && apiError.response.status >= 400 && apiError.response.status < 500) {
+      if (apiError?.response?.status && apiError.response.status >= HTTP_STATUS.BAD_REQUEST && apiError.response.status < HTTP_STATUS.INTERNAL_SERVER_ERROR) {
         return false;
       }
       
@@ -26,7 +27,7 @@ const defaultQueryOptions: DefaultOptions = {
     },
     
     // Retry delay with exponential backoff
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(TIMING.RETRY_BASE_DELAY * 2 ** attemptIndex, TIMING.RETRY_MAX_DELAY),
     
     // Refetch on window focus (only in production)
     refetchOnWindowFocus: process.env.NODE_ENV === 'production',

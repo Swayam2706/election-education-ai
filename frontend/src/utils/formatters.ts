@@ -23,10 +23,10 @@ export const formatRelativeTime = (date: string | Date): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - dateObj.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
+  const diffSec = Math.floor(diffMs / TIMING.MILLISECONDS_PER_SECOND);
+  const diffMin = Math.floor(diffSec / TIMING.SECONDS_PER_MINUTE);
+  const diffHour = Math.floor(diffMin / TIMING.MINUTES_PER_HOUR);
+  const diffDay = Math.floor(diffHour / TIMING.HOURS_PER_DAY);
   const diffWeek = Math.floor(diffDay / 7);
   const diffMonth = Math.floor(diffDay / 30);
   const diffYear = Math.floor(diffDay / 365);

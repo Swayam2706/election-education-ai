@@ -42,7 +42,7 @@ class ApiService {
     
     this.client = axios.create({
       baseURL: this.baseURL,
-      timeout: 30000,
+      timeout: TIMING.API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -167,7 +167,7 @@ class ApiService {
           config.retries = (config.retries || 0) - 1;
           
           // Exponential backoff
-          const delay = Math.pow(2, 3 - (config.retries || 0)) * 1000;
+          const delay = Math.pow(2, 3 - (config.retries || 0)) * TIMING.RETRY_BASE_DELAY;
           await new Promise(resolve => setTimeout(resolve, delay));
           
           return this.client.request(config);
@@ -183,7 +183,7 @@ class ApiService {
     return (
       !error.response ||
       error.code === 'NETWORK_ERROR' ||
-      (error.response.status >= 500 && error.response.status < 600)
+      (error.response.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR && error.response.status < 600)
     );
   }
 

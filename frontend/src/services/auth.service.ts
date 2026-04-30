@@ -7,6 +7,7 @@
 import { apiService } from './api.service';
 import { useAppStore } from '../store/useAppStore';
 import toast from 'react-hot-toast';
+import { TIMING } from '../config/constants';
 
 // Types
 interface LoginCredentials {
@@ -455,13 +456,13 @@ class AuthService {
     // Also refresh 1 hour before expiry if user is active
     this.refreshTimer = setInterval(() => {
       this.refreshToken();
-    }, 6 * 60 * 60 * 1000); // 6 hours
+    }, TIMING.TOKEN_REFRESH_INTERVAL);
 
     // Set up automatic refresh before token expiry
     // JWT tokens expire in 7 days, refresh after 6 days
     setTimeout(() => {
       this.refreshToken();
-    }, 6 * 24 * 60 * 60 * 1000); // 6 days
+    }, TIMING.TOKEN_EXPIRY_BUFFER);
   }
 
   private clearTokenRefresh(): void {
@@ -483,11 +484,11 @@ class AuthService {
     try {
       // Decode JWT to check expiry (basic check without verification)
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const now = Date.now() / 1000;
+      const now = Date.now() / TIMING.MILLISECONDS_PER_SECOND;
       const timeUntilExpiry = payload.exp - now;
       
       // Refresh if token expires in less than 1 hour
-      return timeUntilExpiry < 3600;
+      return timeUntilExpiry < (TIMING.SECONDS_PER_MINUTE * TIMING.MINUTES_PER_HOUR);
     } catch {
       return false;
     }
