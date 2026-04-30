@@ -8,8 +8,8 @@ router.post('/track', optionalAuth, async (req, res) => {
   try {
     const { eventType, eventData } = req.body;
     
-    // Log event (in production, send to analytics service like Google Analytics, Mixpanel, etc.)
-    console.log('Analytics Event:', {
+    // Log event to analytics service
+    logger.info('Analytics Event', {
       eventType,
       eventData,
       userId: req.user?.userId || 'anonymous',

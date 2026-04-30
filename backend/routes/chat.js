@@ -215,8 +215,10 @@ router.post('/send', authenticate, async (req, res) => {
     let retries = 3;
     let lastError = null;
 
-    console.log('🤖 Generating AI response for message:', message.substring(0, 50) + '...');
-    console.log('📝 Gemini API Key present:', !!process.env.GEMINI_API_KEY);
+    logger.info('Generating AI response', { 
+      messagePreview: message.substring(0, 50) + '...',
+      hasApiKey: !!process.env.GEMINI_API_KEY 
+    });
 
     while (retries > 0 && !aiMessage) {
       try {
@@ -224,7 +226,7 @@ router.post('/send', authenticate, async (req, res) => {
           throw new Error('Gemini API key not configured');
         }
 
-        console.log(`🔄 Attempt ${4 - retries}/3 - Calling Gemini API...`);
+        logger.debug('Calling Gemini API', { attempt: 4 - retries, retriesLeft: retries });
 
         // Use gemini-2.5-flash (latest fast model)
         const model = genAI.getGenerativeModel({ 
@@ -253,7 +255,7 @@ router.post('/send', authenticate, async (req, res) => {
           throw new Error('Empty response from AI');
         }
 
-        console.log('✅ AI response generated successfully');
+        logger.info('AI response generated successfully');
         break; // Success, exit retry loop
       } catch (error) {
         lastError = error;
@@ -263,7 +265,7 @@ router.post('/send', authenticate, async (req, res) => {
         
         if (retries > 0) {
           const waitTime = Math.pow(2, 3 - retries) * 1000;
-          console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+          logger.warn('Retrying Gemini API call', { waitTime, retriesLeft: retries });
           // Wait before retry (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, waitTime));
         }
