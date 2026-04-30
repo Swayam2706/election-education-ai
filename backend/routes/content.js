@@ -2,6 +2,7 @@ const express = require('express');
 const Content = require('../models/Content');
 const User = require('../models/User');
 const { authenticate } = require('../middleware/auth');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
@@ -51,7 +52,7 @@ router.get('/', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Content route error:', error);
+    logger.error('Content route error', { error });
     res.status(500).json({ 
       success: false,
       error: { message: error.message }
@@ -82,7 +83,7 @@ router.get('/:slug', async (req, res) => {
       data: { content }
     });
   } catch (error) {
-    console.error('Content by slug error:', error);
+    logger.error('Content by slug error', { error });
     res.status(500).json({ 
       success: false,
       error: { message: error.message }
@@ -193,7 +194,7 @@ router.get('/featured/list', async (req, res) => {
       data: { content }
     });
   } catch (error) {
-    console.error('Featured content error:', error);
+    logger.error('Featured content error', { error });
     res.status(500).json({ 
       success: false,
       error: { message: error.message }

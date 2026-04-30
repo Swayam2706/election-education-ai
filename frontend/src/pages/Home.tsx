@@ -223,11 +223,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-sm font-medium text-primary mb-8"
           >
-            <Vote className="w-4 h-4" />
-            Election Education Platform · Powered by Gemini AI
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-sm font-medium text-primary mb-8">
+              <Vote className="w-4 h-4" />
+              Election Education Platform · Powered by Gemini AI
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            </span>
           </motion.div>
 
           <motion.h1
@@ -319,7 +320,6 @@ export default function Home() {
                     {s}
                   </span>
                 ))}
-              </div>
               </div>
             </div>
           </motion.div>

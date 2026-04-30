@@ -1,6 +1,7 @@
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const { body, validationResult } = require('express-validator');
+const { logger } = require('../utils/logger');
 
 // Rate limiting configurations
 const createRateLimiter = (windowMs, max, message) => {
@@ -47,7 +48,10 @@ const sanitizeData = () => {
   return mongoSanitize({
     replaceWith: '_',
     onSanitize: ({ req, key }) => {
-      console.warn(`Sanitized ${key} in request from ${req.ip}`);
+      logger.warn('Sanitized request data', { 
+        key, 
+        ip: req.ip 
+      });
     }
   });
 };

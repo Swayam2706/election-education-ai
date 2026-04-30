@@ -42,6 +42,14 @@ const {
   preventSQLInjection,
   secureHeaders: enhancedSecureHeaders
 } = require('./middleware/security-enhanced');
+const { sanitizeRequest, validateContentType } = require('./middleware/input-validation');
+const { 
+  getAPIDocumentation, 
+  getHealthCheck, 
+  getReadinessCheck, 
+  getLivenessCheck,
+  getMetrics 
+} = require('./middleware/api-documentation');
 
 const app = express();
 const serverLogger = createLogger('Server');
@@ -78,6 +86,10 @@ const setupMiddleware = (app) => {
   app.use(advancedXSSProtection);
   app.use(preventSQLInjection);
   app.use(xssProtection);
+
+  // Input sanitization
+  app.use(sanitizeRequest);
+  app.use(validateContentType());
 
   // Performance monitoring
   app.use(requestTiming);
@@ -190,20 +202,15 @@ const setupMiddleware = (app) => {
 
 // Setup routes with caching
 const setupRoutes = (app) => {
-  // Health check endpoint
-  app.get('/health', asyncHandler(async (req, res) => {
-    const health = {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-      memory: process.memoryUsage(),
-      environment: config.get('NODE_ENV'),
-      version: process.env.npm_package_version || '1.0.0'
-    };
+  // API Documentation
+  app.get('/api', getAPIDocumentation);
+  app.get('/api/docs', getAPIDocumentation);
 
-    res.json(health);
-  }));
+  // Health check endpoints
+  app.get('/health', getHealthCheck);
+  app.get('/health/ready', getReadinessCheck);
+  app.get('/health/live', getLivenessCheck);
+  app.get('/metrics', getMetrics);
 
   // API status endpoint
   app.get('/api/status', asyncHandler(async (req, res) => {

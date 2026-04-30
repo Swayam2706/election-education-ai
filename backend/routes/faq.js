@@ -1,5 +1,6 @@
 const express = require('express');
 const FAQ = require('../models/FAQ');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
       data: { faqs }
     });
   } catch (error) {
-    console.error('FAQ route error:', error);
+    logger.error('FAQ route error', { error });
     res.status(500).json({
       success: false,
       error: { message: error.message }
@@ -65,7 +66,7 @@ router.get('/search', async (req, res) => {
       data: { faqs }
     });
   } catch (error) {
-    console.error('FAQ search error:', error);
+    logger.error('FAQ search error', { error });
     res.status(500).json({
       success: false,
       error: { message: error.message }

@@ -1,5 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
@@ -178,7 +179,7 @@ router.post('/check', [
       data: result
     });
   } catch (error) {
-    console.error('Eligibility check error:', error);
+    logger.error('Eligibility check error', { error });
     res.status(500).json({
       success: false,
       error: { message: error.message }

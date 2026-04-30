@@ -4,6 +4,7 @@ const Chat = require('../models/Chat');
 const User = require('../models/User');
 const { authenticate } = require('../middleware/auth');
 const { validate, chatValidation } = require('../middleware/validation');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
@@ -260,8 +261,10 @@ router.post('/send', authenticate, async (req, res) => {
       } catch (error) {
         lastError = error;
         retries--;
-        console.error(`❌ Gemini API error (${3 - retries}/3):`, error.message);
-        console.error('Error details:', error);
+        logger.error(`Gemini API error (${3 - retries}/3)`, { 
+          message: error.message,
+          details: error 
+        });
         
         if (retries > 0) {
           const waitTime = Math.pow(2, 3 - retries) * 1000;
@@ -274,7 +277,7 @@ router.post('/send', authenticate, async (req, res) => {
 
     // If all retries failed, use fallback response
     if (!aiMessage) {
-      console.error('All Gemini API retries failed:', lastError);
+      logger.error('All Gemini API retries failed', { error: lastError });
       
       // Provide contextual fallback based on the question
       const lowerMessage = message.toLowerCase();
@@ -316,7 +319,7 @@ router.post('/send', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Chat error:', error);
+    logger.error('Chat error', { error });
     res.status(500).json({
       success: false,
       error: { 

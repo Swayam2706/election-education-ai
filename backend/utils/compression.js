@@ -2,6 +2,7 @@
 
 const zlib = require('zlib');
 const { promisify } = require('util');
+const { logger } = require('./logger');
 
 const gzip = promisify(zlib.gzip);
 const brotli = promisify(zlib.brotliCompress);
@@ -76,7 +77,7 @@ function smartCompression(options = {}) {
           return res.send(compressed);
         }
       } catch (error) {
-        console.error('Compression error:', error);
+        logger.error('Compression error', { error });
       }
 
       // Fallback to uncompressed

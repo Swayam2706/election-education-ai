@@ -1,4 +1,5 @@
 // Database query optimization utilities
+const { logger } = require('./logger');
 
 /**
  * Build optimized MongoDB query with pagination
@@ -89,7 +90,10 @@ async function ensureIndexes(model, fields = []) {
     try {
       await model.collection.createIndex(index);
     } catch (error) {
-      console.error(`Failed to create index ${JSON.stringify(index)}:`, error.message);
+      logger.error('Failed to create index', { 
+        index: JSON.stringify(index), 
+        error: error.message 
+      });
     }
   }
 }
@@ -190,7 +194,10 @@ class QueryMonitor {
     });
 
     if (duration > this.slowQueryThreshold) {
-      console.warn(`Slow query detected: ${query.name} took ${duration}ms`);
+      logger.warn('Slow query detected', { 
+        queryName: query.name, 
+        duration: `${duration}ms` 
+      });
     }
 
     return duration;

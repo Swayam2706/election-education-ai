@@ -1,4 +1,10 @@
-import { apiService } from './api.service';
+/**
+ * Eligibility Service
+ * Handles voter eligibility checking
+ */
+
+import BaseApiService from './base-api.service';
+import { ApiResponse } from '../types';
 
 export interface EligibilityCheck {
   age: number;
@@ -13,24 +19,45 @@ export interface EligibilityResult {
   nextSteps: string[];
 }
 
-export const eligibilityService = {
-  async checkEligibility(data: EligibilityCheck) {
-    const response = await apiService.post('/eligibility/check', data);
-    return response;
-  },
-
-  async getStates() {
-    const response = await apiService.get('/eligibility/states');
-    return response;
-  },
-
-  async getStateInfo(stateCode: string) {
-    const response = await apiService.get(`/eligibility/state/${stateCode}`);
-    return response;
-  },
-
-  async getStateRequirements(stateCode: string) {
-    const response = await apiService.get(`/eligibility/requirements/${stateCode}`);
-    return response;
+/**
+ * Eligibility Service Class
+ * Extends BaseApiService for voter eligibility operations
+ */
+class EligibilityService extends BaseApiService {
+  /**
+   * Check voter eligibility
+   * @param data - Eligibility check data
+   * @returns Promise with eligibility result
+   */
+  async checkEligibility(data: EligibilityCheck): Promise<ApiResponse<EligibilityResult>> {
+    return this.post<EligibilityResult>('/eligibility/check', data);
   }
-};
+
+  /**
+   * Get list of states
+   * @returns Promise with states list
+   */
+  async getStates(): Promise<ApiResponse<{ states: Array<{ code: string; name: string }> }>> {
+    return this.get('/eligibility/states');
+  }
+
+  /**
+   * Get state-specific information
+   * @param stateCode - State code
+   * @returns Promise with state info
+   */
+  async getStateInfo(stateCode: string): Promise<ApiResponse<unknown>> {
+    return this.get(`/eligibility/state/${stateCode}`);
+  }
+
+  /**
+   * Get state voting requirements
+   * @param stateCode - State code
+   * @returns Promise with requirements
+   */
+  async getStateRequirements(stateCode: string): Promise<ApiResponse<unknown>> {
+    return this.get(`/eligibility/requirements/${stateCode}`);
+  }
+}
+
+export default new EligibilityService();

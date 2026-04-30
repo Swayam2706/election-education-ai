@@ -1,12 +1,44 @@
+/**
+ * Base API Service - Enterprise-grade HTTP client abstraction
+ * 
+ * Features:
+ * - Automatic token management
+ * - Request deduplication
+ * - Error handling with retry logic
+ * - Request/response interceptors
+ * - Type-safe API responses
+ * 
+ * @class BaseApiService
+ * @example
+ * ```typescript
+ * class UserService extends BaseApiService {
+ *   async getUsers() {
+ *     return this.get<User[]>('/users');
+ *   }
+ * }
+ * ```
+ */
+
 // Base API Service - Clean abstraction layer
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { API_CONFIG, AUTH_CONFIG, HTTP_STATUS, ERROR_MESSAGES } from '../config/constants';
 import { ApiResponse, ApiError } from '../types';
 
+/**
+ * Base API Service class providing HTTP client functionality
+ * All domain services should extend this class
+ */
 class BaseApiService {
+  /** Axios instance for making HTTP requests */
   protected client: AxiosInstance;
-  private requestQueue: Map<string, Promise<any>> = new Map();
+  
+  /** Queue to prevent duplicate concurrent requests */
+  private requestQueue: Map<string, Promise<ApiResponse<unknown>>> = new Map();
 
+  /**
+   * Creates a new BaseApiService instance
+   * @param baseURL - Base URL for API requests (defaults to API_CONFIG.baseURL)
+   */
   constructor(baseURL: string = API_CONFIG.baseURL) {
     this.client = axios.create({
       baseURL,
@@ -19,6 +51,13 @@ class BaseApiService {
     this.setupInterceptors();
   }
 
+  /**
+   * Sets up request and response interceptors
+   * - Adds authentication token to requests
+   * - Adds request ID for tracking
+   * - Handles common error scenarios
+   * @private
+   */
   private setupInterceptors(): void {
     // Request interceptor
     this.client.interceptors.request.use(
@@ -43,6 +82,11 @@ class BaseApiService {
     );
   }
 
+  /**
+   * Handles API errors and performs appropriate actions
+   * @param error - Axios error object
+   * @private
+   */
   private async handleError(error: AxiosError): Promise<void> {
     const status = error.response?.status;
 
@@ -66,6 +110,11 @@ class BaseApiService {
     }
   }
 
+  /**
+   * Handles unauthorized (401) responses
+   * Clears token and redirects to login page
+   * @private
+   */
   private handleUnauthorized(): void {
     this.clearToken();
     if (window.location.pathname !== '/login') {
@@ -73,6 +122,11 @@ class BaseApiService {
     }
   }
 
+  /**
+   * Displays error message to user
+   * @param message - Error message to display
+   * @private
+   */
   private showError(message: string): void {
     // This will be overridden by toast in actual implementation
     if (typeof window !== 'undefined') {
@@ -82,26 +136,62 @@ class BaseApiService {
     }
   }
 
+  /**
+   * Retrieves authentication token from localStorage
+   * @returns Authentication token or null if not found
+   * @protected
+   */
   protected getToken(): string | null {
     return localStorage.getItem(AUTH_CONFIG.tokenKey);
   }
 
+  /**
+   * Stores authentication token in localStorage
+   * @param token - Authentication token to store
+   * @protected
+   */
   protected setToken(token: string): void {
     localStorage.setItem(AUTH_CONFIG.tokenKey, token);
   }
 
+  /**
+   * Removes authentication token from localStorage
+   * @protected
+   */
   protected clearToken(): void {
     localStorage.removeItem(AUTH_CONFIG.tokenKey);
   }
 
+  /**
+   * Generates unique request ID for tracking
+   * @returns Unique request identifier
+   * @private
+   */
   private generateRequestId(): string {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  /**
+   * Generates cache key for request deduplication
+   * @param method - HTTP method
+   * @param url - Request URL
+   * @param params - Request parameters
+   * @returns Cache key string
+   * @private
+   */
   private getCacheKey(method: string, url: string, params?: Record<string, unknown>): string {
     return `${method}:${url}:${JSON.stringify(params || {})}`;
   }
 
+  /**
+   * Makes HTTP request with deduplication and error handling
+   * @param method - HTTP method (GET, POST, PUT, DELETE, PATCH)
+   * @param url - Request URL
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
     url: string,
@@ -129,29 +219,76 @@ class BaseApiService {
     return requestPromise;
   }
 
-  // HTTP Methods
+  /**
+   * Performs GET request
+   * @param url - Request URL
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('GET', url, config);
   }
 
+  /**
+   * Performs POST request
+   * @param url - Request URL
+   * @param data - Request body data
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('POST', url, { ...config, data });
   }
 
+  /**
+   * Performs PUT request
+   * @param url - Request URL
+   * @param data - Request body data
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('PUT', url, { ...config, data });
   }
 
+  /**
+   * Performs PATCH request
+   * @param url - Request URL
+   * @param data - Request body data
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('PATCH', url, { ...config, data });
   }
 
+  /**
+   * Performs DELETE request
+   * @param url - Request URL
+   * @param config - Axios request configuration
+   * @returns Promise resolving to API response
+   * @protected
+   * @template T - Response data type
+   */
   protected async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('DELETE', url, config);
   }
 
-  // Utility methods
-  protected buildQueryString(params: Record<string, any>): string {
+  /**
+   * Builds URL query string from parameters object
+   * @param params - Parameters to convert to query string
+   * @returns URL-encoded query string
+   * @protected
+   */
+  protected buildQueryString(params: Record<string, unknown>): string {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -161,6 +298,12 @@ class BaseApiService {
     return query.toString();
   }
 
+  /**
+   * Converts unknown error to standardized ApiError format
+   * @param error - Error object from API call
+   * @returns Standardized API error object
+   * @protected
+   */
   protected handleApiError(error: unknown): ApiError {
     const err = error as { response?: { data?: { error?: { message?: string; code?: string; details?: unknown } }; status?: number }; message?: string };
     return {

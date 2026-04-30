@@ -1,5 +1,12 @@
+const { logger } = require('../utils/logger');
+
 const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
+  logger.error('Error handler caught error', { 
+    error: err.message, 
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method
+  });
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
