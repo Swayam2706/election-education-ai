@@ -120,20 +120,20 @@ export default function Home() {
         const response = await siteService.getStats();
         if (response.success && response.data) {
           setStats([
-            { id: 1, value: `${response.data.totalUsers || 0}+`, label: 'Active Users', icon: 'Users' },
-            { id: 2, value: `${response.data.totalQuizzes || 0}`, label: 'Quizzes Available', icon: 'BookOpen' },
-            { id: 3, value: `${response.data.totalContent || 0}`, label: 'Articles', icon: 'FileText' },
-            { id: 4, value: '4.9/5', label: 'User Rating', icon: 'Star' }
+            { id: 1, value: `${response.data.totalUsers || 0}+`, label: 'Citizens Learning', icon: 'Users' },
+            { id: 2, value: `${response.data.totalQuizzes || 0}`, label: 'Election Quizzes', icon: 'BookOpen' },
+            { id: 3, value: `${response.data.totalContent || 0}`, label: 'Voting Guides', icon: 'FileText' },
+            { id: 4, value: '4.9/5', label: 'Learner Rating', icon: 'Star' }
           ]);
         }
       } catch (error) {
         logger.error('Failed to load stats', error);
         // Fallback to default stats
         setStats([
-          { id: 1, value: '10K+', label: 'Active Users', icon: 'Users' },
-          { id: 2, value: '50+', label: 'Quizzes Available', icon: 'BookOpen' },
-          { id: 3, value: '100+', label: 'Articles', icon: 'FileText' },
-          { id: 4, value: '4.9/5', label: 'User Rating', icon: 'Star' }
+          { id: 1, value: '10K+', label: 'Citizens Learning', icon: 'Users' },
+          { id: 2, value: '50+', label: 'Election Quizzes', icon: 'BookOpen' },
+          { id: 3, value: '100+', label: 'Voting Guides', icon: 'FileText' },
+          { id: 4, value: '4.9/5', label: 'Learner Rating', icon: 'Star' }
         ]);
       } finally {
         setLoading(false);
@@ -146,35 +146,59 @@ export default function Home() {
   const features = [
     {
       id: 1,
-      title: 'Interactive Learning',
-      description: 'Engage with interactive content and quizzes',
-      badge: 'Popular',
+      title: 'Step-by-Step Voting Guide',
+      description: 'Learn the complete voting process from registration to casting your ballot',
+      badge: 'Essential',
       href: '/learn',
       color: 'from-blue-500 to-indigo-500'
     },
     {
       id: 2,
-      title: 'AI Assistant',
-      description: 'Get instant answers to your election questions',
+      title: 'AI Election Mentor',
+      description: 'Ask anything about elections, voting rights, and democratic processes',
       badge: 'AI-Powered',
       href: '/chat',
       color: 'from-purple-500 to-pink-500'
     },
     {
       id: 3,
-      title: 'Timeline',
-      description: 'Track important election dates and deadlines',
-      badge: 'Essential',
+      title: 'Election Timeline',
+      description: 'Interactive timeline of election phases from announcement to results',
+      badge: 'Interactive',
       href: '/timeline',
       color: 'from-green-500 to-teal-500'
+    },
+    {
+      id: 4,
+      title: 'Voting Knowledge Quiz',
+      description: 'Test your understanding of election processes and civic duties',
+      badge: 'Learn & Test',
+      href: '/quiz',
+      color: 'from-orange-500 to-red-500'
+    },
+    {
+      id: 5,
+      title: 'Voter Eligibility Check',
+      description: 'Check if you meet voting requirements and learn registration steps',
+      badge: 'Personalized',
+      href: '/eligibility',
+      color: 'from-cyan-500 to-blue-500'
+    },
+    {
+      id: 6,
+      title: 'Election FAQs',
+      description: 'Common questions about voting procedures, rights, and responsibilities',
+      badge: 'Quick Help',
+      href: '/faq',
+      color: 'from-pink-500 to-purple-500'
     }
   ];
 
   const trustBadges = [
-    'Government Verified',
-    'WCAG 2.1 AA',
-    'Privacy First',
-    'Open Source',
+    'Civic Education Certified',
+    'WCAG 2.1 AA Accessible',
+    'Privacy Protected',
+    'Free for All Citizens',
   ];
 
   const handleCTAClick = useCallback((action) => {
@@ -199,10 +223,10 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-sm font-medium text-primary mb-8"
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-sm font-medium text-primary mb-8"
           >
-            <Sparkles className="w-4 h-4" />
-            Powered by Gemini AI · Free for all citizens
+            <Vote className="w-4 h-4" />
+            Election Education Platform · Powered by Gemini AI
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           </motion.div>
 
@@ -224,8 +248,8 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Your interactive assistant to understand the election process, timelines, and steps 
-            in an easy-to-follow way — powered by AI, designed for every citizen.
+            Your interactive AI-powered assistant to understand elections, voting procedures, and democratic processes 
+            — from voter registration to ballot casting. Learn at your own pace with step-by-step guidance.
           </motion.p>
 
           <motion.div
@@ -235,15 +259,15 @@ export default function Home() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
             <Link to="/register" onClick={() => handleCTAClick('register')}>
-              <CTAButton icon={<Zap className="w-4 h-4" />}>
-                Start Learning Free
+              <CTAButton icon={<Vote className="w-4 h-4" />}>
+                Start Election Education
                 <ArrowRight className="w-4 h-4" />
               </CTAButton>
             </Link>
             <Link to="/chat" onClick={() => handleCTAClick('try_ai')}>
               <AnimatedButton variant="outline" size="lg" className="h-12 px-8 text-base gap-2 rounded-xl border-border hover:border-primary/40 hover:bg-accent">
-                <Play className="w-4 h-4 fill-current" />
-                Try AI Assistant
+                <MessageSquare className="w-4 h-4" />
+                Ask Election Questions
               </AnimatedButton>
             </Link>
           </motion.div>
@@ -285,16 +309,17 @@ export default function Home() {
               <div className="chat-bubble-user px-3 py-2 text-sm ml-auto max-w-[85%]">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Sparkles className="w-3 h-3" />
-                  <span className="text-xs font-medium opacity-80">AI Response</span>
+                  <span className="text-xs font-medium opacity-80">AI Election Mentor</span>
                 </div>
-                To register, you need to be 18+, a citizen, and provide valid ID. Visit your local election office or register online at the official portal...
+                To register to vote, you need to be 18+ years old, a citizen, and have valid identification. You can register online through the official election portal or visit your local election office. I can guide you through each step!
               </div>
               <div className="flex gap-1.5 mt-3">
-                {['Voter ID', 'Polling Booth', 'Election Date'].map((s) => (
+                {['Voter Registration', 'Polling Locations', 'Election Dates', 'Voting Rights'].map((s) => (
                   <span key={s} className="px-2.5 py-1 rounded-full bg-accent text-xs text-muted-foreground border border-border cursor-pointer hover:border-primary/40 hover:text-primary transition-colors">
                     {s}
                   </span>
                 ))}
+              </div>
               </div>
             </div>
           </motion.div>
@@ -356,20 +381,20 @@ export default function Home() {
               <div className="relative px-8 py-16 text-center text-white">
                 <Vote className="w-12 h-12 mx-auto mb-4 opacity-90" />
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                  Your vote is your voice
+                  Every Vote Matters in Democracy
                 </h2>
                 <p className="text-lg opacity-80 max-w-xl mx-auto mb-8">
-                  Join thousands of citizens who are learning about their democratic rights and responsibilities.
+                  Join thousands of citizens learning about their voting rights, election procedures, and democratic responsibilities through our interactive platform.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Link to="/register" onClick={() => handleCTAClick('get_started_cta')}>
                     <AnimatedButton size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-8 rounded-xl font-semibold gap-2">
-                      Get Started Free <ArrowRight className="w-4 h-4" />
+                      Begin Learning Journey <ArrowRight className="w-4 h-4" />
                     </AnimatedButton>
                   </Link>
                   <Link to="/chat" onClick={() => handleCTAClick('ask_ai_cta')}>
                     <AnimatedButton size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary h-12 px-8 rounded-xl gap-2 font-semibold transition-all">
-                      <MessageSquare className="w-4 h-4" /> Ask AI Assistant
+                      <MessageSquare className="w-4 h-4" /> Ask Election Mentor
                     </AnimatedButton>
                   </Link>
                 </div>
