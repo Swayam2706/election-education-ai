@@ -34,9 +34,13 @@ export const retryWithBackoff = async <T>(
 };
 
 /**
- * Debounce function
+ * Debounce function - delays execution until after wait time has elapsed
+ * @template T - Function type
+ * @param func - Function to debounce
+ * @param wait - Wait time in milliseconds
+ * @returns Debounced function
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -52,9 +56,13 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 /**
- * Throttle function
+ * Throttle function - limits execution to once per limit period
+ * @template T - Function type
+ * @param func - Function to throttle
+ * @param limit - Minimum time between executions in milliseconds
+ * @returns Throttled function
  */
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {

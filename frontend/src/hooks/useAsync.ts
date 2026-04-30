@@ -29,7 +29,7 @@ export function useAsync<T>(
   });
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: unknown[]) => {
       setState({ data: null, loading: true, error: null });
 
       try {

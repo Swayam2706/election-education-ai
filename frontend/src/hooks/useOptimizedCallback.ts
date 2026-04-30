@@ -1,8 +1,14 @@
 // Performance optimization hooks
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 
-// Debounced callback
-export const useDebouncedCallback = <T extends (...args: any[]) => any>(
+/**
+ * Hook for debounced callbacks
+ * @template T - Function type
+ * @param callback - Callback function to debounce
+ * @param delay - Delay in milliseconds
+ * @returns Debounced callback function
+ */
+export const useDebouncedCallback = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -29,8 +35,14 @@ export const useDebouncedCallback = <T extends (...args: any[]) => any>(
   );
 };
 
-// Throttled callback
-export const useThrottledCallback = <T extends (...args: any[]) => any>(
+/**
+ * Hook for throttled callbacks
+ * @template T - Function type
+ * @param callback - Callback function to throttle
+ * @param delay - Minimum delay between executions in milliseconds
+ * @returns Throttled callback function
+ */
+export const useThrottledCallback = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -48,9 +60,15 @@ export const useThrottledCallback = <T extends (...args: any[]) => any>(
   );
 };
 
-// Memoized value with deep comparison
-export const useDeepMemo = <T>(factory: () => T, deps: any[]): T => {
-  const ref = useRef<{ deps: any[]; value: T }>();
+/**
+ * Hook for memoized values with deep comparison
+ * @template T - Value type
+ * @param factory - Factory function to create value
+ * @param deps - Dependencies array
+ * @returns Memoized value
+ */
+export const useDeepMemo = <T>(factory: () => T, deps: unknown[]): T => {
+  const ref = useRef<{ deps: unknown[]; value: T }>();
 
   if (!ref.current || !deepEqual(ref.current.deps, deps)) {
     ref.current = { deps, value: factory() };
@@ -59,8 +77,13 @@ export const useDeepMemo = <T>(factory: () => T, deps: any[]): T => {
   return ref.current.value;
 };
 
-// Deep equality check
-const deepEqual = (a: any, b: any): boolean => {
+/**
+ * Deep equality check for comparing values
+ * @param a - First value
+ * @param b - Second value
+ * @returns True if values are deeply equal
+ */
+const deepEqual = (a: unknown, b: unknown): boolean => {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (typeof a !== 'object' || typeof b !== 'object') return false;
@@ -79,10 +102,16 @@ const deepEqual = (a: any, b: any): boolean => {
   return true;
 };
 
-// Optimized event handler
-export const useOptimizedEventHandler = <T extends (...args: any[]) => any>(
+/**
+ * Hook for optimized event handlers with memoization
+ * @template T - Function type
+ * @param handler - Event handler function
+ * @param deps - Dependencies array
+ * @returns Memoized event handler
+ */
+export const useOptimizedEventHandler = <T extends (...args: unknown[]) => unknown>(
   handler: T,
-  deps: any[] = []
+  deps: unknown[] = []
 ): T => {
   return useCallback(handler, deps) as T;
 };
