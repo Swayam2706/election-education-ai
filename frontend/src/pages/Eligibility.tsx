@@ -3,6 +3,7 @@ import { CheckCircle, XCircle, AlertTriangle, MapPin, Calendar, User, FileText }
 import { siteService } from '../services/site.service';
 import { AnimatedContainer } from '../animations/motion-components/AnimatedContainer';
 import { ScrollReveal } from '../animations/scroll-effects/ScrollAnimations';
+import { logger } from '../utils/logger';
 
 interface FormData {
   age: string;
@@ -125,7 +126,7 @@ export default function Eligibility() {
       const response = await siteService.getEligibilityStates();
       setStates(response.data?.states || []);
     } catch (error) {
-      console.error('Failed to load states:', error);
+      logger.error('Failed to load states', error);
     }
   };
 
@@ -134,7 +135,7 @@ export default function Eligibility() {
       const response = await siteService.getStateInfo(stateCode);
       setStateInfo(response.data?.stateInfo || response.stateInfo || null);
     } catch (error) {
-      console.error('Failed to load state info:', error);
+      logger.error('Failed to load state info', error);
       setStateInfo(null);
     }
   };
@@ -156,7 +157,7 @@ export default function Eligibility() {
       const response = await siteService.checkEligibility(formData);
       setResult(response.data);
     } catch (error) {
-      console.error('Failed to check eligibility:', error);
+      logger.error('Failed to check eligibility', error);
       setResult({
         eligible: false,
         reasons: ['Unable to check eligibility. Please try again.'],

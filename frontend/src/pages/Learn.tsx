@@ -4,6 +4,7 @@ import { Search, Clock, User, AlertCircle } from 'lucide-react';
 import { contentService } from '../services/content.service';
 import { ComponentErrorBoundary } from '../components/ErrorBoundary';
 import { useDebounce } from '../hooks/useDebounce';
+import { logger } from '../utils/logger';
 
 // Memoized Article Card Component
 const ArticleCard = React.memo(({ article }) => {
@@ -66,7 +67,7 @@ function LearnContent() {
           setContent(response.data.contents || []);
         }
       } catch (error) {
-        console.error('Failed to load content:', error);
+        logger.error('Failed to load content', error);
         setError(error.message || 'Failed to load articles');
       } finally {
         setLoading(false);

@@ -170,8 +170,10 @@ export const createResponsiveAnimation = (
 
 // ─── Animation Debugging ───
 export const debugAnimation = (name: string, variants: any) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`Animation Debug - ${name}:`, variants);
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    import('../utils/logger').then(({ logger }) => {
+      logger.debug(`Animation Debug - ${name}`, variants);
+    });
   }
   return variants;
 };

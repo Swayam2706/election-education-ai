@@ -53,11 +53,15 @@ const queryCache = new QueryCache({
     const apiError = error as { message?: string; response?: { status?: number; data?: { error?: { message?: string } } } };
     
     // Log query errors
-    console.error('Query error:', {
-      queryKey: query.queryKey,
-      error: apiError.message,
-      status: apiError?.response?.status,
-    });
+    if (typeof window !== 'undefined') {
+      import('../utils/logger').then(({ logger }) => {
+        logger.error('Query error', {
+          queryKey: query.queryKey,
+          error: apiError.message,
+          status: apiError?.response?.status,
+        });
+      });
+    }
 
     // Don't show toast for background refetches
     if (query.state.data !== undefined) {
@@ -71,10 +75,12 @@ const queryCache = new QueryCache({
   
   onSuccess: (data, query) => {
     // Log successful queries in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Query success:', {
-        queryKey: query.queryKey,
-        data,
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      import('../utils/logger').then(({ logger }) => {
+        logger.debug('Query success', {
+          queryKey: query.queryKey,
+          data,
+        });
       });
     }
   },
@@ -86,12 +92,16 @@ const mutationCache = new MutationCache({
     const apiError = error as { message?: string; response?: { status?: number; data?: { error?: { message?: string } } } };
     
     // Log mutation errors
-    console.error('Mutation error:', {
-      mutationKey: mutation.options.mutationKey,
-      error: apiError.message,
-      status: apiError?.response?.status,
-      variables,
-    });
+    if (typeof window !== 'undefined') {
+      import('../utils/logger').then(({ logger }) => {
+        logger.error('Mutation error', {
+          mutationKey: mutation.options.mutationKey,
+          error: apiError.message,
+          status: apiError?.response?.status,
+          variables,
+        });
+      });
+    }
 
     // Show error toast (unless explicitly disabled)
     if (!mutation.options.meta?.skipErrorToast) {
@@ -102,11 +112,13 @@ const mutationCache = new MutationCache({
   
   onSuccess: (data, variables, context, mutation) => {
     // Log successful mutations in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Mutation success:', {
-        mutationKey: mutation.options.mutationKey,
-        data,
-        variables,
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      import('../utils/logger').then(({ logger }) => {
+        logger.debug('Mutation success', {
+          mutationKey: mutation.options.mutationKey,
+          data,
+          variables,
+        });
       });
     }
 
@@ -310,7 +322,11 @@ export const cacheUtils = {
  * @param errorInfo - Additional error information including component stack
  */
 export const queryErrorHandler = (error: Error, errorInfo: { componentStack: string }) => {
-  console.error('React Query Error Boundary:', error, errorInfo);
+  if (typeof window !== 'undefined') {
+    import('../utils/logger').then(({ logger }) => {
+      logger.error('React Query Error Boundary', { error, errorInfo });
+    });
+  }
   
   // Log to external service in production
   if (process.env.NODE_ENV === 'production') {

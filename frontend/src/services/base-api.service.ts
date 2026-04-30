@@ -75,7 +75,11 @@ class BaseApiService {
 
   private showError(message: string): void {
     // This will be overridden by toast in actual implementation
-    console.error(message);
+    if (typeof window !== 'undefined') {
+      import('../utils/logger').then(({ logger }) => {
+        logger.error('API Error', { message });
+      });
+    }
   }
 
   protected getToken(): string | null {

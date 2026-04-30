@@ -58,7 +58,11 @@ export const useChat = (): UseChatReturn => {
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to load chat history';
       setError(errorMessage);
-      console.error('Load history error:', err);
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Load history error', err);
+        });
+      }
     } finally {
       setLoading(false);
     }

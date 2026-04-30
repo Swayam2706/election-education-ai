@@ -48,9 +48,17 @@ try {
     }
   }
   
-  console.log('✅ Firebase initialized successfully with Analytics and Performance Monitoring');
+  if (typeof window !== 'undefined') {
+    import('./logger').then(({ logger }) => {
+      logger.info('Firebase initialized successfully with Analytics and Performance Monitoring');
+    });
+  }
 } catch (error) {
-  console.error('❌ Firebase initialization error:', error);
+  if (typeof window !== 'undefined') {
+    import('./logger').then(({ logger }) => {
+      logger.error('Firebase initialization error', error);
+    });
+  }
   auth = null;
   googleProvider = null;
 }

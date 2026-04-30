@@ -86,7 +86,11 @@ class AuthService {
           this.clearAuth();
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error);
+        if (typeof window !== 'undefined') {
+          import('../utils/logger').then(({ logger }) => {
+            logger.error('Auth initialization failed', error);
+          });
+        }
         this.clearAuth();
       } finally {
         store.setAuthLoading(false);
@@ -243,8 +247,12 @@ class AuthService {
       // Notify server about logout
       await apiService.post('/auth/logout', {}, { skipErrorToast: true });
     } catch (error) {
-      // Ignore logout errors
-      console.warn('Logout request failed:', error);
+      // Ignore logout errors - user is logging out anyway
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.warn('Logout request failed', error);
+        });
+      }
     }
 
     this.clearAuth();
@@ -332,7 +340,11 @@ class AuthService {
 
       return response.success && response.data ? response.data.available : false;
     } catch (error) {
-      console.error('Email availability check failed:', error);
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Email availability check failed', error);
+        });
+      }
       return false;
     }
   }
@@ -353,7 +365,11 @@ class AuthService {
         return token;
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Token refresh failed', error);
+        });
+      }
       this.clearAuth();
     }
 
@@ -374,7 +390,11 @@ class AuthService {
         return response.data.user;
       }
     } catch (error) {
-      console.error('Get current user failed:', error);
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Get current user failed', error);
+        });
+      }
       this.clearAuth();
     }
 

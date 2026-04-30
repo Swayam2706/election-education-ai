@@ -190,12 +190,14 @@ const logError = (error: Error, errorInfo: ErrorInfo, context?: string) => {
   };
 
   // Log to console in development
-  if (process.env.NODE_ENV === 'development') {
-    console.group('🚨 Error Boundary Caught Error');
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
-    console.error('Context:', context);
-    console.groupEnd();
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    import('../utils/logger').then(({ logger }) => {
+      logger.error('Error Boundary Caught Error', {
+        error,
+        errorInfo,
+        context
+      });
+    });
   }
 
   // Send to error tracking service in production

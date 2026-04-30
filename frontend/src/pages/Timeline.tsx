@@ -3,6 +3,7 @@ import { Calendar, Clock, MapPin, AlertCircle, CheckCircle, Info } from 'lucide-
 import { timelineService } from '../services/timeline.service';
 import { AnimatedContainer } from '../animations/motion-components/AnimatedContainer';
 import { ScrollReveal } from '../animations/scroll-effects/ScrollAnimations';
+import { logger } from '../utils/logger';
 
 interface TimelineEventProps {
   event: {
@@ -118,7 +119,7 @@ export default function Timeline() {
       const response = await timelineService.getEvents(params);
       setEvents(response.data?.events || []);
     } catch (error) {
-      console.error('Failed to load timeline events:', error);
+      logger.error('Failed to load timeline events', error);
       setError('Failed to load timeline events. Please try again.');
     } finally {
       setLoading(false);

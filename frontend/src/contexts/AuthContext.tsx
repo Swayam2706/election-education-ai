@@ -58,7 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             token,
           });
         } catch (err: any) {
-          console.error('Firebase auth sync failed:', err);
+          if (typeof window !== 'undefined') {
+            import('../utils/logger').then(({ logger }) => {
+              logger.error('Firebase auth sync failed', err);
+            });
+          }
           authStore.setAuthError(err.message || 'Authentication sync failed');
           toast.error('Sign-in failed. Please try again.');
         } finally {
@@ -170,19 +174,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (auth) await signOut(auth);
       await authService.logout();
     } catch (err) {
-      console.error('Logout error:', err);
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Logout error', err);
+        });
+      }
       authStore.logout();
     }
   };
 
   const handleUpdateProfile = async (data: any) => {
-    try { await authService.updateProfile(data); }
-    catch (err) { console.error('Profile update error:', err); throw err; }
+    try { 
+      await authService.updateProfile(data); 
+    } catch (err) { 
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Profile update error', err);
+        });
+      }
+      throw err; 
+    }
   };
 
   const changePassword = async (data: any) => {
-    try { await authService.changePassword(data); }
-    catch (err) { console.error('Password change error:', err); throw err; }
+    try { 
+      await authService.changePassword(data); 
+    } catch (err) { 
+      if (typeof window !== 'undefined') {
+        import('../utils/logger').then(({ logger }) => {
+          logger.error('Password change error', err);
+        });
+      }
+      throw err; 
+    }
   };
 
   const clearError = () => authStore.setAuthError(null);

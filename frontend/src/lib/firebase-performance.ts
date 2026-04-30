@@ -6,7 +6,11 @@ let performance: ReturnType<typeof getPerformance> | null = null;
 try {
   performance = getPerformance(app);
 } catch (error) {
-  console.warn('Firebase Performance not available:', error);
+  if (typeof window !== 'undefined') {
+    import('../utils/logger').then(({ logger }) => {
+      logger.warn('Firebase Performance not available', error);
+    });
+  }
 }
 
 export const trackPageLoad = (pageName: string) => {

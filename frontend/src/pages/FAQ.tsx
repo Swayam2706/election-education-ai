@@ -3,6 +3,7 @@ import { Search, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, HelpCircle } from
 import { faqService } from '../services/faq.service';
 import { AnimatedContainer } from '../animations/motion-components/AnimatedContainer';
 import { ScrollReveal } from '../animations/scroll-effects/ScrollAnimations';
+import { logger } from '../utils/logger';
 
 interface FAQItemType {
   _id: string;
@@ -121,7 +122,7 @@ export default function FAQ() {
       const response = await faqService.getFAQs(params);
       setFaqs(response.data?.faqs || []);
     } catch (error) {
-      console.error('Failed to load FAQs:', error);
+      logger.error('Failed to load FAQs', error);
       setError('Failed to load FAQs. Please try again.');
     } finally {
       setLoading(false);
@@ -133,7 +134,7 @@ export default function FAQ() {
       const response = await faqService.getCategories();
       setCategories(response.data?.categories || []);
     } catch (error) {
-      console.error('Failed to load categories:', error);
+      logger.error('Failed to load categories', error);
     }
   };
 
@@ -153,7 +154,7 @@ export default function FAQ() {
         return faq;
       }));
     } catch (error) {
-      console.error('Failed to vote:', error);
+      logger.error('Failed to vote', error);
     }
   };
 

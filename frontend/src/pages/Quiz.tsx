@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Award, Clock, Users } from 'lucide-react';
 import { quizService } from '../services/quiz.service';
 import { Quiz as QuizType } from '../types';
+import { logger } from '../utils/logger';
 
 // Memoized Quiz Card Component
 const QuizCard = React.memo(({ quiz }) => {
@@ -66,7 +67,7 @@ export default function Quiz() {
           setQuizzes(response.data.quizzes || []);
         }
       } catch (error) {
-        console.error('Failed to load quizzes:', error);
+        logger.error('Failed to load quizzes', error);
       } finally {
         setLoading(false);
       }
